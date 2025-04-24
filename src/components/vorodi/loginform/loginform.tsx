@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import { signIn } from "next-auth/react"
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -12,27 +12,22 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-
-
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    const res = await signIn('credentials', {
+    e.preventDefault()
+    setLoading(true)
+    const result = await signIn('credentials', {
       redirect: false,
       email,
       password,
-    });
-
-    if (res?.error) {
-      setError("Login failed. Please check your credentials.");
-      setLoading(false);
+      callbackUrl: '/dashboard'
+    })
+  
+    if (result?.error) {
+      setError(result.error)
     } else {
-      router.push('/dashboard');
+      router.push(result?.url || '/dashboard')
     }
-  };
-
+  }
   return (
     <div className="max-w-md mx-auto mt-16 bg-black bg-opacity-60 backdrop-blur-md text-white py-10 px-6 sm:px-10 shadow-xl rounded-2xl border border-gray-800">
       {error && (

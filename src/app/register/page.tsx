@@ -1,4 +1,4 @@
-import RegisterForm from "@/components/auth/registerform/registerform";
+import RegisterForm from "@/components/vorodi/registerform/registerform";
 
 export default function RegisterPage() {
     return (

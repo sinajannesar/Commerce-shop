@@ -1,11 +1,14 @@
 import Image from "next/image";
 import { Product } from "@/types/types";
+import { Suspense } from "react";
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 shadow-md hover:shadow-lg transition duration-300">
       <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-white ">
+      
         {product.image ? (
+          <Suspense>
           <Image
             src={product.image}
             alt={String(product.title)}
@@ -13,9 +16,11 @@ export default function ProductCard({ product }: { product: Product }) {
             sizes="(max-width: 968px) 100vw, (max-width: 1400px) 50vw, 33vw"
             className="object-cover"
           />
+          </Suspense>
         ) : (
           <div className="w-full h-full bg-gray-300" />
         )}
+        
       </div>
 
 

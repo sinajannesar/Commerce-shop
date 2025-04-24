@@ -1,6 +1,5 @@
-"use client";
 import Head from 'next/head';
-import LoginForm from '@/components/auth/loginform/loginform';
+import LoginForm from '@/components/vorodi/loginform/loginform';
 
 export default function LoginPage() {
   return (

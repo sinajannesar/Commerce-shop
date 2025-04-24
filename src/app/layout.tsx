@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import NavigationWrapper from "@/components/header/navigationWrapper";
 import "./globals.css";
-import { AuthProvider } from '@/app/provider';
 export const metadata: Metadata = {
   title: "Shop - The Ultimate Online Store",
   description: "Discover the best deals on electronics, fashion, home essentials and more. Fast delivery. Secure checkout.",
@@ -42,11 +41,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased bg-gradient-to-br from-purple-200 via-white to-blue-300">
+      <body >
         <NavigationWrapper />
-        <AuthProvider>
         {children}
-        </AuthProvider>
       </body>
     </html>
   );
