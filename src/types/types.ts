@@ -12,17 +12,16 @@ export interface Product {
   };
   
 
+
+  
   export interface Order {
     id: number;
-    productId: number;
-    userId: number;
-    quantity: number;
-    date: string;
+    items?: string;
+    total: string;
+    status?:string ;
+    createdAt?: string;
   }
   
-  export interface DatabaseOrder {
-    orders: Order[];
-  }
   
   export interface User {
     id: number;
@@ -34,9 +33,11 @@ export interface Product {
     phonenumber: number;
     nashionalcode:string;
     createdAt?: string;
+    
   }
   
   export interface DatabaseUserList {
     users: User[];
+    orders: Order[];
   }
   

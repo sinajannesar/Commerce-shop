@@ -17,7 +17,7 @@ export async function initUsersDb(): Promise<DatabaseUserList> {
   try {
     return await readUsersDb();
   } catch {
-    const emptyDb: DatabaseUserList = { users: [] };
+    const emptyDb: DatabaseUserList = { users: [] , orders:[] };
     await writeUsersDb(emptyDb);
     return emptyDb;
   }
