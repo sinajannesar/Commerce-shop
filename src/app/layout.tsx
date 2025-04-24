@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import NavigationWrapper from "@/components/header/navigationWrapper";
 import "./globals.css";
+import { Toaster } from 'react-hot-toast';
+
 export const metadata: Metadata = {
   title: "Shop - The Ultimate Online Store",
   description: "Discover the best deals on electronics, fashion, home essentials and more. Fast delivery. Secure checkout.",
@@ -43,6 +45,7 @@ export default function RootLayout({
     <html lang="en">
       <body >
         <NavigationWrapper />
+        <Toaster position="top-right" reverseOrder={false} />
         {children}
       </body>
     </html>
