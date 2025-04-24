@@ -1,4 +1,5 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+// lib/authOptions.ts
+import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { readUsersDb } from '@/lib/dbmaneger/usersDb';
 import { User } from "@/types/types";
@@ -65,7 +66,7 @@ export const authOptions: NextAuthOptions = {
             phonenumber: user.phonenumber?.toString(),
             nashionalcode: user.nashionalcode,
             createdAt: user.createdAt,
-            role: 'user', 
+            role: 'user',
             provider: 'credentials'
           } as AuthUser;
         } catch (error) {
@@ -83,7 +84,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      // Assign the user data from the token to the session
       if (token.user) {
         session.user = token.user;
       }
@@ -92,9 +92,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
-    error: '/login',
+    error: '/login'
   },
   secret: process.env.NEXTAUTH_SECRET
 };
-
-export default NextAuth(authOptions);

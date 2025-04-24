@@ -1,33 +1,34 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import React from 'react';
-import { signIn } from "next-auth/react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { signIn } from "next-auth/react";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    const result = await signIn('credentials', {
+    e.preventDefault();
+    setLoading(true);
+
+    const result = await signIn("credentials", {
       redirect: false,
       email,
       password,
-      callbackUrl: '/dashboard'
-    })
-  
+      callbackUrl: "/dashboard",
+    });
+
     if (result?.error) {
-      setError(result.error)
+      setError(result.error);
     } else {
-      router.push(result?.url || '/dashboard')
+      router.push(result?.url || "/dashboard");
     }
-  }
+  };
   return (
     <div className="max-w-md mx-auto mt-16 bg-black bg-opacity-60 backdrop-blur-md text-white py-10 px-6 sm:px-10 shadow-xl rounded-2xl border border-gray-800">
       {error && (
@@ -71,7 +72,10 @@ export default function LoginForm() {
 
         <div className="flex items-center justify-between">
           <label className="flex items-center space-x-2 text-sm">
-            <input type="checkbox" className="h-4 w-4 text-purple-600 rounded focus:ring-purple-500 bg-gray-700 border-gray-600" />
+            <input
+              type="checkbox"
+              className="h-4 w-4 text-purple-600 rounded focus:ring-purple-500 bg-gray-700 border-gray-600"
+            />
             <span>Remember me</span>
           </label>
         </div>
@@ -83,13 +87,31 @@ export default function LoginForm() {
         >
           {loading ? (
             <>
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
+              <svg
+                className="animate-spin -ml-1 mr-3 h-5 w-5 inline"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z"
+                />
               </svg>
               Signing in...
             </>
-          ) : 'Sign in'}
+          ) : (
+            "Sign in"
+          )}
         </button>
       </form>
 
