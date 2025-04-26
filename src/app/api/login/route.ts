@@ -25,7 +25,6 @@ export async function POST(request: Request) {
       );
     }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { password:_, ...userData } = user;
     return NextResponse.json(
       { success: true, user: userData },

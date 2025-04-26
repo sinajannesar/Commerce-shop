@@ -1,58 +1,110 @@
-"use client"
-import Image from "next/image";
-import { Product } from "@/types/types";
-import { Suspense } from "react";
-import { handleOrder } from "@/lib/handelerproducts/handeler";
-import toast from "react-hot-toast";
-import { useCartStore } from "@/store/useCartStore";
+'use client'
+
+import Image from 'next/image'
+import { Product } from '@/types/types'
+import { Suspense, useState } from 'react'
+import { handleOrder } from '@/lib/handelerproducts/handeler'
+import toast from 'react-hot-toast'
+import { useCartStore } from '@/store/useCartStore'
+import styles from './ProductCard.module.css'
+
+// Define type for cart items
+interface CartItem {
+  name: string
+  price: number
+  quantity: number
+}
+
+// Order data type for handleOrder
+interface OrderData {
+  items: CartItem[]
+  total: number
+}
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { quantity, setQuantity } = useCartStore(); 
+  const { quantity, setQuantity } = useCartStore()
+  const [isLoading, setIsLoading] = useState(false)
+
   const handleClick = async () => {
-    const newQuantity = quantity + 1;
-    setQuantity(newQuantity);
+    if (isLoading) return // Prevent multiple clicks
 
-    const result = await handleOrder({
-      items: [{ productId: product.id, quantity: newQuantity }],
-      total: product.price * newQuantity,
-    });
+    try {
+      setIsLoading(true)
 
-    if (result.error) {
-      console.error("error in the handler:", result.error);
-      toast.error("Failed to add order.");
-    } else {
-      toast.success(`Order placed with quantity: ${newQuantity}`);
+      // Increase total cart items count
+      const newCartQuantity = quantity + 1 // فقط یک آیتم اضافه می‌شود
+      setQuantity(newCartQuantity)
+
+      // Calculate total price for this product (فقط یک آیتم)
+      const totalItemPrice = product.price
+
+      const loadingToast = toast.loading('Adding to cart...')
+
+      const result = await handleOrder({
+        items: [
+          {
+            name: product.title,
+            price: product.price,
+            quantity: 1, // تعداد ثابت 1
+          },
+        ],
+        total: totalItemPrice,
+      } as OrderData)
+
+      // Dismiss loading toast
+      toast.dismiss(loadingToast)
+
+      // Show success or error message
+      if (result?.error) {
+        console.error('Error in handler:', result.error)
+        toast.error('Failed to add to cart')
+      } else {
+        toast.success(`Added ${product.title} to cart`)
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error)
+      toast.error('Something went wrong')
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 shadow-md hover:shadow-lg transition duration-300">
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-white ">
+    <div className={styles.container}>
+      {/* Image */}
+      <div className={styles.imageWrapper}>
         {product.image ? (
-          <Suspense>
+          <Suspense fallback={<div className={styles.imageFallback} />}>
             <Image
               src={product.image}
               alt={String(product.title)}
               fill
               sizes="(max-width: 968px) 100vw, (max-width: 1400px) 50vw, 33vw"
-              className="object-cover"
+              className={styles.image}
             />
           </Suspense>
         ) : (
-          <div className="w-full h-full bg-gray-300" />
+          <div className={styles.imageFallback} />
         )}
       </div>
 
-      <h1 className="text-white text-sm font-semibold mb-2 line-clamp-2 mt-3">{product.title}</h1>
-      <p className="text-neutral-300 text-sm line-clamp-3 mb-2">{product.description}</p>
-      <p className="text-neutral-400 mb-2 text-sm">
-        Price: {product.price.toLocaleString()} $
-      </p>
+      {/* Content */}
+      <div className={styles.content}>
+        <h1 className={styles.title}>{product.title}</h1>
+        <p className={styles.description}>{product.description}</p>
+        <p className={styles.price}>
+          Price: <span className={styles.priceValue}>${product.price.toLocaleString()}</span>
+        </p>
 
-      <button onClick={handleClick}
-        className="w-full border border-white text-white py-2 rounded-xl hover:bg-white hover:text-black transition">
-        Add to Cart
-      </button>
+        {/* Add to Cart Button */}
+        <button
+          onClick={handleClick}
+          disabled={isLoading}
+          className={`${styles.addButton} ${isLoading ? styles.disabled : ''}`}
+        >
+          {isLoading ? 'Adding...' : 'Add to Cart'}
+        </button>
+      </div>
     </div>
-  );
+  )
 }

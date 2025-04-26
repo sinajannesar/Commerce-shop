@@ -7,14 +7,9 @@ import { SessionProvider } from "next-auth/react";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
     return (
-        <html lang="en">
-            <body>
-
-                <Sidebar />
-
-                <SessionProvider>{children}</SessionProvider>
-
-            </body>
-        </html>
+        <SessionProvider>
+            <Sidebar />
+            {children}
+        </SessionProvider>
     );
 }

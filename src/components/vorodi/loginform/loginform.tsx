@@ -25,6 +25,7 @@ export default function LoginForm() {
 
     if (result?.error) {
       setError(result.error);
+      setLoading(false)
     } else {
       router.push(result?.url || "/dashboard");
     }
