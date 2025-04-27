@@ -12,7 +12,6 @@ const Unauthenticated = dynamic(() => import("@/components/profile/Unauthenticat
 const NoData = dynamic(() => import("@/components/profile/NoData"), { ssr: false });
 const ProfileHeader = dynamic(() => import("@/components/profile/ProfileHeader"), { ssr: false });
 const ProfileInfoItem = dynamic(() => import("@/components/profile/ProfileInfoItem"), { ssr: false });
-// const CompleteProfileButton = dynamic(() => import("@/components/profile/CompleteProfileButton"), { ssr: false });
 const MMProfileModal = dynamic(() => import("@/components/profile/MMProfileModal"), {ssr:false})
 export default function ProfilePage() {
   const { status } = useSession();
@@ -41,7 +40,6 @@ export default function ProfilePage() {
             <ProfileInfoItem icon={<PhoneIcon className="h-5 w-5" />} label="Phone" value={user.phonenumber ? String(user.phonenumber) : "Not provided"} />
             <ProfileInfoItem icon={<MapPinIcon className="h-5 w-5" />} label="Address" value={user.address || "Not provided"} />
           </div>
-          {/* <CompleteProfileButton /> */}
           <MMProfileModal user={user}/>
         </div>
       </div>

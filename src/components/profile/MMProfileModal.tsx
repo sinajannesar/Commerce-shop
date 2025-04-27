@@ -6,13 +6,12 @@ import { motion } from 'framer-motion';
 
 export default function ProfileModal({ user }: { user: User }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [editedUser, setEditedUser] = useState(user); // برای ذخیره مقادیر ویرایش شده
+  const [editedUser, setEditedUser] = useState(user); 
 
-  // بررسی اینکه user مقدار ندارد یا ندارد
-  if (!user) return null; // اگر user نباشد هیچ چیزی نمایش داده نمی‌شود
+  if (!user) return null; 
 
   const filteredEntries = Object.entries(user).filter(
-    ([key]) => key.toLowerCase() !== 'password'
+    ([key]) => !['password', 'id', 'createdat'].includes(key.toLowerCase())
   );
 
   const handleChange = (key: string, value: string) => {
@@ -24,9 +23,8 @@ export default function ProfileModal({ user }: { user: User }) {
 
   const handleSave = async () => {
     try {
-      // ارسال اطلاعات ویرایش شده به سرور
       const response = await fetch('/api/user', {
-        method: 'PUT', // درخواست به صورت PUT برای بروزرسانی
+        method: 'PUT', 
         headers: {
           'Content-Type': 'application/json',
         },
@@ -76,7 +74,7 @@ export default function ProfileModal({ user }: { user: User }) {
                   <span className="capitalize text-gray-400">{key}: </span>
                   <input
                     type="text"
-                    value={editedUser[key as keyof User] || value}  // استفاده از value
+                    value={editedUser[key as keyof User] || value}  
                     onChange={(e) => handleChange(key, e.target.value)}
                     className="bg-transparent text-white  focus:outline-none w-full ml-2"
                   />

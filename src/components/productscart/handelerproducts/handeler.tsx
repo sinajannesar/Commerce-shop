@@ -1,4 +1,3 @@
-// File: lib/handelerproducts/handeler.tsx
 
 
 interface CartItem {

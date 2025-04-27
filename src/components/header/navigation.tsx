@@ -2,13 +2,19 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { FaShoppingCart, FaTimes, FaBars } from 'react-icons/fa'
+import { FaShoppingCart, FaTimes, FaBars, FaTrash } from 'react-icons/fa'
+import { useCartStore } from '@/lib/store/useCartStore' // Import the store
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [opacity, setOpacity] = useState(1)
-  const [orderItems, setOrderItems] = useState<{ name: string; price: number; quantity: number }[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
+  
+  // Use the cart store
+  const { items, removeItem, clearCart, updateQuantity } = useCartStore()
+  
+  // Calculate total price from cart items
+  const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,22 +26,6 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  useEffect(() => {
-    const loadOrderData = async () => {
-      try {
-        const response = await fetch('/users.json')
-        const data = await response.json()
-        setOrderItems(data.items || [])
-      } catch (error) {
-        console.error("Error loading order data:", error)
-      }
-    }
-
-    loadOrderData()
-  }, [])
-
-  const totalPrice = orderItems.reduce((sum, item) => sum + item.price, 0)
 
   return (
     <>
@@ -76,9 +66,9 @@ export default function Navbar() {
                 onClick={() => setIsModalOpen(true)}
               >
                 <FaShoppingCart size={18} />
-                {orderItems.length > 0 && (
+                {items.length > 0 && (
                   <span className="absolute -top-1 -right-1 text-xs font-bold bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full px-2 py-0.5 animate-bounce">
-                    {orderItems.length}
+                    {items.length}
                   </span>
                 )}
               </button>
@@ -160,14 +150,31 @@ export default function Navbar() {
 
             {/* Items */}
             <ul className="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-              {orderItems.length > 0 ? (
-                orderItems.map((item, index) => (
+              {items.length > 0 ? (
+                items.map((item, index) => (
                   <li
                     key={index}
                     className="flex justify-between items-center text-gray-700 text-sm p-2 rounded-lg hover:bg-gray-100/50 transition-all duration-200"
                   >
-                    <span className="font-medium">{item.name}</span>
-                    <span className="font-semibold">${item.price.toFixed(2)}</span>
+                    <div className="flex items-center">
+                      <span className="font-medium">{item.name}</span>
+                      <span className="ml-2 text-gray-500">x{item.quantity}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="font-semibold mr-3">${(item.price * item.quantity).toFixed(2)}</span>
+                      <button 
+                        onClick={() => updateQuantity(item.name)}
+                        className="p-1 mr-2 text-purple-600 hover:text-purple-800"
+                      >
+                        +
+                      </button>
+                      <button 
+                        onClick={() => removeItem(item.name)}
+                        className="p-1 text-red-500 hover:text-red-700"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    </div>
                   </li>
                 ))
               ) : (
@@ -183,10 +190,18 @@ export default function Navbar() {
               </span>
             </div>
 
-            {/* Checkout Button */}
-            <button className="mt-6 w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3 rounded-xl shadow-md hover:shadow-xl transition-all duration-300">
-              Proceed to Checkout
-            </button>
+            {/* Buttons */}
+            <div className="mt-6 flex space-x-3">
+              <button 
+                onClick={() => clearCart()}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 rounded-xl transition-all duration-300"
+              >
+                Clear Cart
+              </button>
+              <button className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3 rounded-xl shadow-md hover:shadow-xl transition-all duration-300">
+                Checkout
+              </button>
+            </div>
           </div>
         </div>
       )}

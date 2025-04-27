@@ -29,7 +29,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate that each item has name, price and quantity
     for (const item of orderData.items) {
       if (
         !item.name ||
@@ -50,7 +49,6 @@ export async function POST(request: Request) {
       0
     );
 
-    // If the provided total doesn't match the calculated total (with small floating point margin)
     if (Math.abs(calculatedTotal - orderData.total) > 0.01) {
       return NextResponse.json(
         { error: "Total price doesn't match item prices" },
@@ -67,7 +65,7 @@ export async function POST(request: Request) {
     }
 
     const order: Order = {
-      id: Date.now() + Math.floor(Math.random() * 1000), // Ensure unique ID
+      id: Date.now() + Math.floor(Math.random() * 1000), 
       userId: Number(session.user.id),
       items: orderData.items,
       total: calculatedTotal.toFixed(2), // U
@@ -103,7 +101,6 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
-    // Ensure the user is authenticated
     if (!session || !session.user) {
       return NextResponse.json(
         { error: "User is not authenticated" },
@@ -113,12 +110,10 @@ export async function GET() {
 
     const db = await readUsersDb();
 
-    // If no orders in the database yet
     if (!db.orders) {
       return NextResponse.json({ orders: [] }, { status: 200 });
     }
 
-    // Find orders for this user
     const userOrders = db.orders.filter(
       (order) => String(order.userId) === String(session.user.id)
     );

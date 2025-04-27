@@ -3,66 +3,27 @@
 import Image from 'next/image'
 import { Product } from '@/types/types'
 import { Suspense, useState } from 'react'
-import { handleOrder } from '@/lib/handelerproducts/handeler'
 import toast from 'react-hot-toast'
-import { useCartStore } from '@/store/useCartStore'
+import { useCartStore } from '../../lib/store/useCartStore'
 import styles from './ProductCard.module.css'
 
-// Define type for cart items
-interface CartItem {
-  name: string
-  price: number
-  quantity: number
-}
-
-// Order data type for handleOrder
-interface OrderData {
-  items: CartItem[]
-  total: number
-}
-
 export default function ProductCard({ product }: { product: Product }) {
-  const { quantity, setQuantity } = useCartStore()
+  const { addItem } = useCartStore()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleClick = async () => {
-    if (isLoading) return // Prevent multiple clicks
+    if (isLoading) return
+    setIsLoading(true)
 
     try {
-      setIsLoading(true)
+      addItem({
+        name: product.title,
+        price: product.price,
+        quantity: 1,
+      })
 
-      // Increase total cart items count
-      const newCartQuantity = quantity + 1 // فقط یک آیتم اضافه می‌شود
-      setQuantity(newCartQuantity)
-
-      // Calculate total price for this product (فقط یک آیتم)
-      const totalItemPrice = product.price
-
-      const loadingToast = toast.loading('Adding to cart...')
-
-      const result = await handleOrder({
-        items: [
-          {
-            name: product.title,
-            price: product.price,
-            quantity: 1, // تعداد ثابت 1
-          },
-        ],
-        total: totalItemPrice,
-      } as OrderData)
-
-      // Dismiss loading toast
-      toast.dismiss(loadingToast)
-
-      // Show success or error message
-      if (result?.error) {
-        console.error('Error in handler:', result.error)
-        toast.error('Failed to add to cart')
-      } else {
-        toast.success(`Added ${product.title} to cart`)
-      }
-    } catch (error) {
-      console.error('Unexpected error:', error)
+      toast.success(`Added ${product.title} to cart`)
+    } catch  {
       toast.error('Something went wrong')
     } finally {
       setIsLoading(false)
@@ -71,7 +32,6 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className={styles.container}>
-      {/* Image */}
       <div className={styles.imageWrapper}>
         {product.image ? (
           <Suspense fallback={<div className={styles.imageFallback} />}>
