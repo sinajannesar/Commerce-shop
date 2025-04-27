@@ -1,12 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaShoppingCart, FaTimes, FaBars, FaTrash } from 'react-icons/fa'
 import { useCartStore } from '@/lib/store/useCartStore'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react' // Import useSession hook
-
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [opacity, setOpacity] = useState(1)

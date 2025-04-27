@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import NavigationWrapper from "@/components/header/navigationWrapper";
+// import type { Metadata } from "next";
+// import NavigationWrapper from "@/components/header/navigationWrapper";
 import "./globals.css";
 import ToasterProvider from "./tosterproviders";
 
