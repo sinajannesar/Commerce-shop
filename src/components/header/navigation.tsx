@@ -3,12 +3,18 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { FaShoppingCart, FaTimes, FaBars, FaTrash } from 'react-icons/fa'
-import { useCartStore } from '@/lib/store/useCartStore' // Import the store
+import { useCartStore } from '@/lib/store/useCartStore'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react' // Import useSession hook
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [opacity, setOpacity] = useState(1)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const router = useRouter()
+  
+  // Use Next.js authentication session
+  const { data: session } = useSession()
   
   // Use the cart store
   const { items, removeItem, clearCart, updateQuantity } = useCartStore()
@@ -26,6 +32,18 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Handle checkout button click
+  const handleCheckout = () => {
+    if (session) {
+      // User has a session, redirect to verification page
+      router.push('/verify')
+    } else {
+      // User doesn't have a session, redirect to login page
+      router.push('/login')
+    }
+    setIsModalOpen(false) // Close the modal
+  }
 
   return (
     <>
@@ -73,18 +91,32 @@ export default function Navbar() {
                 )}
               </button>
 
-              <Link
-                href="/login"
-                className="bg-transparent hover:bg-gray-800/50 text-gray-100 font-medium py-2 px-5 border border-gray-600 hover:border-purple-500 rounded-xl transition-all duration-300 hover:shadow-lg"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-2 px-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
-              >
-                Get Started
-              </Link>
+              {!session ? (
+                <>
+                  <Link
+                    href="/login"
+                    className="bg-transparent hover:bg-gray-800/50 text-gray-100 font-medium py-2 px-5 border border-gray-600 hover:border-purple-500 rounded-xl transition-all duration-300 hover:shadow-lg"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-2 px-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  <span className="text-gray-300 text-sm">Hi, {session.user?.name || 'User'}</span>
+                  <Link
+                    href="/api/auth/signout"
+                    className="bg-transparent hover:bg-gray-800/50 text-gray-100 font-medium py-2 px-4 border border-gray-600 hover:border-red-500 rounded-xl transition-all duration-300 hover:shadow-lg"
+                  >
+                    Sign Out
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -113,18 +145,29 @@ export default function Navbar() {
                 </a>
               ))}
               <div className="flex flex-col space-y-3 pt-4">
-                <Link
-                  href="/login"
-                  className="bg-transparent hover:bg-gray-800/50 text-gray-100 font-medium py-3 px-4 border border-gray-600 hover:border-purple-500 rounded-xl transition-all duration-300 text-center"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/register"
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-center"
-                >
-                  Get Started
-                </Link>
+                {!session ? (
+                  <>
+                    <Link
+                      href="/login"
+                      className="bg-transparent hover:bg-gray-800/50 text-gray-100 font-medium py-3 px-4 border border-gray-600 hover:border-purple-500 rounded-xl transition-all duration-300 text-center"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-center"
+                    >
+                      Get Started
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    href="/api/auth/signout"
+                    className="bg-transparent hover:bg-gray-800/50 text-gray-100 font-medium py-3 px-4 border border-gray-600 hover:border-red-500 rounded-xl transition-all duration-300 text-center"
+                  >
+                    Sign Out
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -190,16 +233,29 @@ export default function Navbar() {
               </span>
             </div>
 
+            {/* Checkout status info */}
+            <p className="text-sm text-gray-500 mt-2 text-center">
+              {session ? 
+                "You're signed in and ready to checkout" :
+                "Please sign in to complete your purchase"
+              }
+            </p>
+
             {/* Buttons */}
-            <div className="mt-6 flex space-x-3">
+            <div className="mt-4 flex space-x-3">
               <button 
                 onClick={() => clearCart()}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 rounded-xl transition-all duration-300"
+                disabled={items.length === 0}
               >
                 Clear Cart
               </button>
-              <button className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3 rounded-xl shadow-md hover:shadow-xl transition-all duration-300">
-                Checkout
+              <button 
+                onClick={handleCheckout}
+                className={`flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ${items.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={items.length === 0}
+              >
+                {session ? "Proceed to Verify" : "Sign In & Checkout"}
               </button>
             </div>
           </div>
