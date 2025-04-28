@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaShoppingCart, FaTimes, FaBars, FaTrash } from 'react-icons/fa'
 import { useCartStore } from '@/lib/store/useCartStore'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react' // Import useSession hook
+
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [opacity, setOpacity] = useState(1)
@@ -33,17 +34,48 @@ export default function Navbar() {
   }, [])
 
   // Handle checkout button click
-  const handleCheckout = () => {
-    if (session) {
-      // User has a session, redirect to verification page
-      router.push('/verify')
-    } else {
-      // User doesn't have a session, redirect to login page
-      router.push('/login')
+  const handleCheckout = async () => {
+    if (!session) {
+      router.push('/login');
+      return;
     }
-    setIsModalOpen(false) // Close the modal
-  }
-
+    
+    if (items.length === 0) {
+      return; 
+    }
+    
+    try {
+     
+      
+      // Call your checkout API
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ items }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      
+      const { url } = await response.json();
+      
+      window.location.href = url;
+      
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      alert('There was a problem processing your payment. Please try again.');
+      
+      // Reset button state
+      const checkoutButton = document.getElementById('checkout-button');
+      if (checkoutButton) {
+        checkoutButton.innerText = session ? "Proceed to Verify" : "Sign In & Checkout";
+      }}
+    
+    setIsModalOpen(false)
+}
   return (
     <>
       <nav
@@ -161,7 +193,7 @@ export default function Navbar() {
                   </>
                 ) : (
                   <Link
-                    href="/api/auth/signout"
+                    href="/api/auth/signout/"
                     className="bg-transparent hover:bg-gray-800/50 text-gray-100 font-medium py-3 px-4 border border-gray-600 hover:border-red-500 rounded-xl transition-all duration-300 text-center"
                   >
                     Sign Out
@@ -232,7 +264,6 @@ export default function Navbar() {
               </span>
             </div>
 
-            {/* Checkout status info */}
             <p className="text-sm text-gray-500 mt-2 text-center">
               {session ? 
                 "You're signed in and ready to checkout" :

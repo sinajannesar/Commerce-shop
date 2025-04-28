@@ -41,6 +41,8 @@ export async function POST(request: Request) {
         id: Date.now(),
         ...validationResult.data,
         phonenumber: Number(validationResult.data.phonenumber), 
+        postalcode:"",
+        city:"",
         address: "",
         nashionalcode:"", 
         createdAt: new Date().toISOString(),

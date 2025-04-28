@@ -1,7 +1,10 @@
-// import type { Metadata } from "next";
-// import NavigationWrapper from "@/components/header/navigationWrapper";
+import type { Metadata } from "next";
+import NavigationWrapper from "@/components/header/navigationWrapper";
 import "./globals.css";
 import ToasterProvider from "./tosterproviders";
+// import { SessionProvider } from "next-auth/react";
+// import AuthProvider from "@/components/AuthProvider";
+import { AuthProvider } from "@/components/providers"
 
 export const metadata: Metadata = {
   title: "Shop - The Ultimate Online Store",
@@ -44,9 +47,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <NavigationWrapper  />
-        <ToasterProvider />
-        {children}
+         <AuthProvider> 
+          <NavigationWrapper />
+          <ToasterProvider />
+          {children}
+         </AuthProvider> 
       </body>
     </html>
   );

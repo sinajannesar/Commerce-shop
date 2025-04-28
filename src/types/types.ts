@@ -1,14 +1,15 @@
 export interface Product {
-  id: number;
-  title: string; // ← قبلاً عدد بود، ولی باید رشته باشه
+  id?: number;
+  title: string;
   price: number;
-  description: string;
-  category: string;
+  description?: string;
   image?: string;
+  category?: string;
+  rating?: { rate: number; count: number };
 }
 
 export interface CartItem {
-  id?: number;
+  id?: string;
   name?: string;
   price: number;
   quantity: number;
@@ -32,6 +33,8 @@ export interface User {
   address: string;
   phonenumber: number;
   nashionalcode: string;
+  city: string;
+  postalcode?: string; 
   createdAt?: string;
 }
 
@@ -43,3 +46,4 @@ export interface DatabaseUserList {
   users: User[];
   orders: Order[];
 }
+

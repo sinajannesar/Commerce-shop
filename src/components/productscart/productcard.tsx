@@ -17,6 +17,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
     try {
       addItem({
+        id: product.id?.toString(),
         name: product.title,
         price: product.price,
         quantity: 1,

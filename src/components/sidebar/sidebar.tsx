@@ -9,7 +9,7 @@ import {
     Users,
     LogOut,
     ChevronRight,
-    Search,
+    
     Star,
 } from "lucide-react";
 
@@ -85,19 +85,7 @@ export default function ProfessionalSidebar() {
                     </Link>
                 </div>
 
-                {/* Search */}
-                {!isCollapsed && (
-                    <div className="px-4 py-3">
-                        <div className="relative">
-                            <input
-                                placeholder="Search..."
-                                className="w-full bg-indigo-800/30 text-white placeholder-indigo-300 rounded-lg py-2 pl-9 pr-4 border border-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
-                            <Search className="absolute left-3 top-2.5 h-4 w-4 text-indigo-300" />
-                        </div>
-                    </div>
-                )}
-
+                
                 {/* Menu */}
                 <nav className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-700 scrollbar-track-transparent py-4 px-3">
                     {!isCollapsed && (
@@ -170,7 +158,7 @@ export default function ProfessionalSidebar() {
                 {/* Bottom */}
                 <div className="p-4 border-t border-indigo-800/50">
                     <Link
-                        href="/logout"
+                        href="/"
                         className="flex items-center p-3 rounded-lg hover:bg-indigo-800/50 text-indigo-200"
                     >
                         <LogOut size={20} />

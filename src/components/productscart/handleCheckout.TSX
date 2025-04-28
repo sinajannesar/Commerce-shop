@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 interface CartItem {
+  id:number
   name: string
   price: number
   quantity: number
@@ -42,7 +43,7 @@ export const useCartStore = create<CartState>()(
       clearCart: () => set({ items: [] }),
     }),
     {
-      name: 'cart-storage', // Key for localStorage
+      name: 'cart-storage', 
     }
   )
 )
