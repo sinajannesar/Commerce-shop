@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useCartStore } from '@/lib/store/useCartStore'
 import { motion } from 'framer-motion'
 
+
+
 export default function SuccessPage() {
   const { clearCart } = useCartStore()
   

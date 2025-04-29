@@ -2,12 +2,12 @@
 
 import Image from 'next/image'
 import { Product } from '@/types/types'
-import { Suspense, useState } from 'react'
+import {  useState } from 'react'
 import toast from 'react-hot-toast'
 import { useCartStore } from '../../lib/store/useCartStore'
 import styles from './ProductCard.module.css'
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product, isFirst = false }: { product: Product, isFirst?: boolean }) {
   const { addItem } = useCartStore()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -34,20 +34,20 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className={styles.container}>
       <div className={styles.imageWrapper}>
-        {product.image ? (
-          <Suspense fallback={<div className={styles.imageFallback} />}>
-            <Image
-              src={product.image}
-              alt={String(product.title)}
-              fill
-              sizes="(max-width: 968px) 100vw, (max-width: 1400px) 50vw, 33vw"
-              className={styles.image}
-            />
-          </Suspense>
-        ) : (
-          <div className={styles.imageFallback} />
-        )}
-      </div>
+  {product.image ? (
+    <Image
+      src={product.image}
+      alt={String(product.title)}
+      fill
+      priority={isFirst}
+ 
+      sizes="(max-width: 968px) 100vw, (max-width: 1400px) 50vw, 33vw"
+      className={styles.image}
+    />
+  ) : (
+    <div className={styles.imageFallback} />
+  )}
+</div>
 
       {/* Content */}
       <div className={styles.content}>

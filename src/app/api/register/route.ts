@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
-import { User } from '@/types/types';
-import { formDataSchema } from '@/schemas/registerschemas';
-import { initUsersDb, writeUsersDb } from '@/lib/dbmaneger/usersDb'; 
+import { NextResponse } from "next/server";
+import { User } from "@/types/types";
+import { formDataSchema } from "@/schemas/registerschemas";
+import { initUsersDb, writeUsersDb } from "@/lib/dbmaneger/usersDb";
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request: Request) {
   try {
@@ -9,58 +10,58 @@ export async function POST(request: Request) {
     const validationResult = formDataSchema.safeParse(inputData);
 
     if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          error: 'Validation failed',
-          details: validationResult.error.issues.map(err => ({
-            field: err.path[0],
-            message: err.message,
-          })),
-        },
-        { status: 400 }
-      );
+      const errors = validationResult.error.issues.map((err) => ({
+        field: err.path[0],
+        message: err.message,
+      }));
+      return NextResponse.json({ error: "Validation failed", details: errors }, { status: 400 });
     }
 
+    const validated = validationResult.data;
     const db = await initUsersDb();
 
-    if (db.users.some(user => user.email === inputData.email)) {
-      return NextResponse.json(
-        { error: 'This email has already been registered' },
-        { status: 409 }
-      );
-    }
+    const duplicateUser = db.users.find(
+      (user) => user.email === validated.email || user.phonenumber === validated.phonenumber
+    );
 
-    if (db.users.some(user => user.phonenumber === inputData.phonenumber)) {
+    if (duplicateUser) {
+      const duplicateField = duplicateUser.email === validated.email ? "email" : "phone number";
       return NextResponse.json(
-        { error: 'This phone number has already been registered' },
+        { error: `This ${duplicateField} has already been registered` },
         { status: 409 }
       );
     }
 
     const newUser: User = {
-        id: Date.now(),
-        ...validationResult.data,
-        phonenumber: Number(validationResult.data.phonenumber), 
-        postalcode:"",
-        city:"",
-        address: "",
-        nashionalcode:"", 
-        createdAt: new Date().toISOString(),
-      };
+      id: uuidv4(),
+      ...validated,
+      postalcode: '',
+      city: '',
+      address: '',
+      nashionalcode: '',
+      createdAt: new Date().toISOString(),
+    };
 
-    db.users.push(newUser);
-    await writeUsersDb(db);
+    await writeUsersDb({ ...db, users: [...db.users, newUser] });
 
+    const userWithoutPassword = {
+      ...newUser,
+      password: undefined, 
+    };
     return NextResponse.json(
       {
         success: true,
-        message: 'Registration successful. Please sign in.',
-        user: newUser,
+        message: "Registration successful. Please sign in.",
+        user: userWithoutPassword,
       },
       { status: 201 }
     );
+
   } catch (error) {
-    console.error('Error in API route:', error);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    console.error("Error in registration handler:", error);
+    return NextResponse.json(
+      { error: "An unexpected error occurred during registration" },
+      { status: 500 }
+    );
   }
 }

@@ -26,12 +26,12 @@ export interface Order {
 
 export interface User {
   id: number;
-  firstname: string;
-  lastname: string;
-  email: string;
+  firstname?: string;
+  lastname?: string;
+  email?: string;
   password?: string;
   address: string;
-  phonenumber: number;
+  phonenumber?: string;
   nashionalcode: string;
   city: string;
   postalcode?: string; 

@@ -1,11 +1,14 @@
 "use client";
 
 import { User } from "@/types/types";
-import ProfileHeader from "./ProfileHeader";
-import ProfileInfoItem from "./ProfileInfoItem";
+import dynamic from "next/dynamic";
+
 // import CompleteProfileButton from "./CompleteProfileButton";
 import { MailIcon, PhoneIcon, MapPinIcon } from "lucide-react";
-import ProfileModal from "./MMProfileModal";
+const ProfileHeader = dynamic(() => import("./ProfileHeader"));
+const ProfileInfoItem = dynamic(() => import("./ProfileInfoItem"));
+
+const ProfileModal = dynamic(() => import("./MMProfileModal"));
 
 export default function ProfileContent({ user }: { user: User }) {
   return (

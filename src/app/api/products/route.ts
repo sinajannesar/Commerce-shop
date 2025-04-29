@@ -1,40 +1,45 @@
-import { NextResponse } from 'next/server';
-import { Product } from '@/types/types';
-import { createClient } from 'redis';
+import { NextResponse } from "next/server";
+import { Product } from "@/types/types";
+import { createClient } from "redis";
 
-// Redis client setup (singleton)
-const redisClient = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
+const redisClient = createClient({
+  url: process.env.REDIS_URL || "redis://localhost:6379",
+});
 
-// Handle Redis client errors
-redisClient.on('error', (err) => console.error('Redis Client Error:', err));
+redisClient.on("error", (err) => console.error("Redis Client Error:", err));
 
-// Connect to Redis once
-let isConnecting = false;
+let redisConnectPromise: Promise<void> | null = null;
 const connectRedis = async () => {
   if (redisClient.isOpen) return;
-  if (isConnecting) {
-    while (isConnecting) await new Promise((resolve) => setTimeout(resolve, 100));
-    return;
+
+  if (!redisConnectPromise) {
+    redisConnectPromise = redisClient
+      .connect()
+      .then(() => {
+        console.log("Redis client connected");
+      })
+      .catch((err) => {
+        console.error("Failed to connect to Redis:", err);
+        throw err;
+      })
+      .finally(() => {
+        redisConnectPromise = null;
+      });
   }
-  try {
-    isConnecting = true;
-    await redisClient.connect();
-    console.log('Redis client connected');
-  } finally {
-    isConnecting = false;
-  }
+
+  await redisConnectPromise;
 };
 
-// Initialize connection
-connectRedis().catch((err) => console.error('Failed to connect to Redis:', err));
+connectRedis().catch((err) =>
+  console.error("Initial Redis connection error:", err)
+);
 
-// Constants for Redis keys and TTL
-const API_PRODUCTS_KEY = 'api:products';
-const LOCAL_PRODUCTS_KEY = 'local:products';
-const API_CACHE_TTL = 3600; // 1 hour TTL for API cache
+const API_PRODUCTS_KEY = "api:products";
+const LOCAL_PRODUCTS_KEY = "local:products";
+const API_CACHE_TTL = 3600;
 
 async function fetchProducts(): Promise<Product[]> {
-  console.log('fetchProducts function is called');
+  console.log("fetchProducts function is called");
 
   try {
     await connectRedis();
@@ -44,11 +49,14 @@ async function fetchProducts(): Promise<Product[]> {
 
     if (cachedApiProducts) {
       apiProducts = JSON.parse(cachedApiProducts);
-      console.log('API products loaded from Redis cache');
+      console.log("API products loaded from Redis cache");
     } else {
-      const apiResponse = await fetch('https://fakestoreapi.com/products', {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
+      const apiResponse = await fetch("https://fakestoreapi.com/products", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=60",
+        },
       });
 
       if (!apiResponse.ok) {
@@ -58,36 +66,36 @@ async function fetchProducts(): Promise<Product[]> {
       apiProducts = await apiResponse.json();
 
       if (!Array.isArray(apiProducts)) {
-        throw new Error('API response is not an array');
+        throw new Error("API response is not an array");
       }
 
       await redisClient.set(API_PRODUCTS_KEY, JSON.stringify(apiProducts), {
         EX: API_CACHE_TTL,
       });
-      console.log('API products fetched and cached in Redis');
+      console.log("API products fetched and cached in Redis");
     }
 
     const localProductsData = await redisClient.get(LOCAL_PRODUCTS_KEY);
     const localProducts: Product[] = localProductsData
       ? JSON.parse(localProductsData)
-      : (() => {
-          redisClient.set(LOCAL_PRODUCTS_KEY, JSON.stringify([]));
-          console.log('Local products initialized in Redis');
-          return [];
-        })();
+      : [];
 
-    if (localProductsData) {
-      console.log('Local products loaded from Redis:', localProducts);
+    if (!localProductsData) {
+      await redisClient.set(LOCAL_PRODUCTS_KEY, JSON.stringify([]));
+      console.log("Local products initialized in Redis");
+    } else {
+      console.log("Local products loaded from Redis:", localProducts);
     }
 
     const combinedProducts = [...apiProducts, ...localProducts];
     const uniqueProducts = combinedProducts.filter(
-      (product, index, self) => index === self.findIndex((p) => p.id === product.id)
+      (product, index, self) =>
+        index === self.findIndex((p) => p.id === product.id)
     );
 
     return uniqueProducts;
   } catch (error) {
-    console.error('Unknown Error:', error);
+    console.error("Unknown Error:", error);
     return [];
   }
 }

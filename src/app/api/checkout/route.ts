@@ -38,8 +38,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // خواندن فایل users.json و پیدا کردن اطلاعات کاربر
-    let userData: User | undefined;
+     let userData: User | undefined;
     try {
       const fileContent = fs.readFileSync(usersFilePath, "utf-8");
       const parsedContent = JSON.parse(fileContent);
@@ -70,7 +69,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // اعتبارسنجی آیتم‌ها
     for (const item of items) {
       if (
         !item.name ||
@@ -86,7 +84,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // ساخت خط آیتم‌ها برای Stripe
     const lineItems = items.map((item) => ({
       price_data: {
         currency: "usd",

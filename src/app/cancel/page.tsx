@@ -1,4 +1,3 @@
-// File: app/cancel/page.tsx
 'use client'
 
 import Link from 'next/link'
@@ -10,8 +9,8 @@ export default function CancelPage() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="bg-[#1A223C]/80 backdrop-blur-sm rounded-2xl border border-[#2A3454] overflow-hidden shadow-xl shadow-blue-900/10 max-w-md w-full p-8 text-center"
+        transition={{ duration: 0.3 }}
+        className="bg-[#1A223C]/80 backdrop-blur-sm rounded-2xl border border-[#2A3454] shadow-xl max-w-md w-full p-8 text-center"
       >
         <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -24,7 +23,7 @@ export default function CancelPage() {
           Your payment process was cancelled. Your cart items are still saved.
         </p>
         
-        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 justify-center">
+        <div className="flex flex-col sm:flex-row sm:space-x-3 justify-center">
           <Link 
             href="/"
             className="bg-transparent hover:bg-[#2A3454]/50 text-gray-300 font-medium py-3 px-6 border border-[#2A3454] hover:border-indigo-500/50 rounded-xl transition-all duration-300"

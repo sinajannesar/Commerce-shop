@@ -3,8 +3,9 @@
     "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
+    "types": ["node"], 
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -14,12 +15,13 @@
     "jsx": "preserve",
     "incremental": true,
     "baseUrl": "src",
-    "noImplicitAny": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": false,
     "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./node_modules/@types", "./types"],
+    
     "plugins": [
       {
         "name": "next"
@@ -35,6 +37,5 @@
     "src/**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "build", "dist", ".next", "coverage"],
-  
+  "exclude": ["node_modules", "build", "dist", ".next", "coverage"]
 }

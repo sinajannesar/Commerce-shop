@@ -1,10 +1,36 @@
-"use client";
+'use client'
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formDataSchema } from "@/schemas/registerschemas";
 import Head from "next/head";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+
+type InputFieldProps = {
+  label: string;
+  name: string;
+  type: string;
+  placeholder: string;
+  required: boolean;
+  pattern?: string;
+  minLength?: number;
+};
+
+const InputField = ({ label, name, type, placeholder, required, pattern, minLength }: InputFieldProps) => (
+  <div>
+    <label htmlFor={name} className="block text-sm mb-1">{label}</label>
+    <input
+      id={name}
+      name={name}
+      type={type}
+      required={required}
+      pattern={pattern}
+      minLength={minLength}
+      className="w-full px-4 py-2 bg-transparent border border-gray-600 rounded-md placeholder-gray-400 focus:ring-2 focus:ring-purple-600"
+      placeholder={placeholder}
+    />
+  </div>
+);
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -20,38 +46,28 @@ export default function RegisterForm() {
       const formData = new FormData(e.currentTarget);
       const rawData = Object.fromEntries(formData.entries());
 
-      if (rawData.phonenumber) {
-        rawData.phonenumber = String(rawData.phonenumber);
-      }
+      if (rawData.phonenumber) rawData.phonenumber = String(rawData.phonenumber);
+
       const validation = formDataSchema.safeParse(rawData);
-      if (!validation.success) {
-        throw new Error(validation.error.errors[0].message);
-      }
-      console.log(validation)
+      if (!validation.success) throw new Error(validation.error.errors[0].message);
 
       const response = await fetch("api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(validation.data),
       });
+
       if (response.ok) {
         await signIn('credentials', {
           email: validation.data.email,
           password: validation.data.password,
           callbackUrl: '/dashboard',
         });
-        
+        router.push("/dashboard");
       } else {
         const data = await response.json();
-        alert(data.error || 'Registration failed. Please try again.')
+        alert(data.error || 'Registration failed. Please try again.');
       }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Registration failed. Please try again.");
-      }
-
-      router.push("/dashboard");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Registration failed. Please try again.");
     } finally {
@@ -81,68 +97,13 @@ export default function RegisterForm() {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstname" className="block text-sm mb-1">First name</label>
-                <input
-                  id="firstname"
-                  name="firstname"
-                  type="text"
-                  required
-                  className="w-full px-4 py-2 bg-transparent border border-gray-600 rounded-md placeholder-gray-400 focus:ring-2 focus:ring-purple-600"
-                  placeholder="John"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="lastname" className="block text-sm mb-1">Last name</label>
-                <input
-                  id="lastname"
-                  name="lastname"
-                  type="text"
-                  required
-                  className="w-full px-4 py-2 bg-transparent border border-gray-600 rounded-md placeholder-gray-400 focus:ring-2 focus:ring-purple-600"
-                  placeholder="Doe"
-                />
-              </div>
+              <InputField label="First name" name="firstname" type="text" placeholder="John" required />
+              <InputField label="Last name" name="lastname" type="text" placeholder="Doe" required />
             </div>
 
-            <div>
-              <label htmlFor="phonenumber" className="block text-sm mb-1">Phone number</label>
-              <input
-                id="phonenumber"
-                name="phonenumber"
-                type="tel"
-                pattern="[0-9]{10,}"
-                required
-                className="w-full px-4 py-2 bg-transparent border border-gray-600 rounded-md placeholder-gray-400 focus:ring-2 focus:ring-purple-600"
-                placeholder="09123456789"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm mb-1">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="w-full px-4 py-2 bg-transparent border border-gray-600 rounded-md placeholder-gray-400 focus:ring-2 focus:ring-purple-600"
-                placeholder="your@email.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm mb-1">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                minLength={8}
-                className="w-full px-4 py-2 bg-transparent border border-gray-600 rounded-md placeholder-gray-400 focus:ring-2 focus:ring-purple-600"
-                placeholder="At least 8 characters"
-              />
-            </div>
+            <InputField label="Phone number" name="phonenumber" type="tel" placeholder="09123456789" required pattern="[0-9]{10,}" />
+            <InputField label="Email" name="email" type="email" placeholder="your@email.com" required />
+            <InputField label="Password" name="password" type="password" placeholder="At least 8 characters" required minLength={8} />
 
             <div className="flex items-center">
               <input
