@@ -58,20 +58,16 @@ vi.mock("next/navigation", () => ({
   })
 }));
 
-// Mock next-auth/react
 vi.mock("next-auth/react", () => ({
   signIn: vi.fn()
 }));
 
-// Mock next/head
 vi.mock("next/head", () => ({
   default: ({ children }) => <>{children}</>
 }));
 
-// Mock fetch API
 global.fetch = vi.fn();
 
-// Mock alert
 window.alert = vi.fn();
 
 describe("RegisterForm", () => {
@@ -113,7 +109,7 @@ describe("RegisterForm", () => {
   });
 
   it("shows loading state when form is submitted", async () => {
-    // Mock fetch to delay the response
+
     (global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(() => new Promise(resolve => setTimeout(() => {
       resolve({
         ok: true,
