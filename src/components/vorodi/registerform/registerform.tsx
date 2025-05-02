@@ -1,10 +1,12 @@
 'use client'
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { formDataSchema } from "@/schemas/registerschemas";
+import { formDataSchema } from "../../../schemas/registerschemas";
 import Head from "next/head";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import React from "react";
+
 
 type InputFieldProps = {
   label: string;
