@@ -16,10 +16,12 @@
     "incremental": true,
     "baseUrl": "src",
     "noImplicitAny": false,
+    
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": false,
     "forceConsistentCasingInFileNames": true,
+    
     "typeRoots": ["./node_modules/@types", "./types"],
     
     "plugins": [
@@ -29,13 +31,19 @@
     ],
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    
   },
   "include": [
     "next-env.d.ts",
     "src/**/*.ts",
+    "__test__/**/*.ts",
+    "__test__/**/*.tsx",
     "src/**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "build", "dist", ".next", "coverage"]
+  "exclude": ["node_modules", "build", "dist", ".next", "coverage"],
+  "rules": {
+  "@typescript-eslint/no-explicit-any": "off"
+}
 }
