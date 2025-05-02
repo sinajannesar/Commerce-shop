@@ -1,6 +1,6 @@
 // __test__/app/api/products/productsapitest.tsx
 import { createClient } from 'redis';
-import { Product } from '@/types/types';
+import { Product } from '../../../../src/types/types';
 import { vi } from 'vitest';
 import { Mock } from 'vitest';
 
@@ -43,6 +43,15 @@ export class ProductsApiPage {
     this.mockFetch = vi.fn();
   }
 
+  // Add these getter methods to provide access to the mock functions
+  public getMockFetch(): Mock {
+    return this.mockFetch;
+  }
+
+  public getMockRedisGet(): Mock {
+    return this.mockRedisGet;
+  }
+
   /**
    * Initialize the test environment
    */
@@ -60,6 +69,10 @@ export class ProductsApiPage {
     
     // Clear mock call history
     this.resetMocks();
+    
+    // Make sure redis.createClient returns the mock with 'on' properly defined
+    const redis = await import('redis');
+    (redis.createClient as Mock).mockReturnValue(this.redisClient);
   }
 
   /**
@@ -80,6 +93,7 @@ export class ProductsApiPage {
   async teardown() {
     global.fetch = this.originalFetch;
     vi.restoreAllMocks();
+    vi.resetModules();
   }
 
   /**

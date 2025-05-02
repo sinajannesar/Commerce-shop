@@ -1,7 +1,7 @@
 // __test__/app/api/products/productsapi.test.tsx
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ProductsApiPage } from './productsapitest';
-import { Product } from '@/types/types';
+import { Product } from '../../../../src/types/types';
 import { Mock } from 'vitest';
 
 // Mock the console methods
@@ -11,7 +11,7 @@ console.error = vi.fn();
 // Mock next/server
 vi.mock('next/server', () => ({
   NextResponse: {
-    json: vi.fn((data: any) => ({ data }))
+    json: vi.fn((data: Product[] | { error: string }) => ({ data }))
   }
 }));
 
@@ -27,8 +27,8 @@ describe('Products API', () => {
     productsApiPage = new ProductsApiPage();
     await productsApiPage.setup();
     
-    // Import the API module and mock the GET function
-    const apiModule = await import('@/app/api/products/route');
+    // Import the API module after the mocks are setup
+    const apiModule = await import('../../../../src/app/api/products/route');
     GET = vi.fn(apiModule.GET) as Mock;
   });
 
