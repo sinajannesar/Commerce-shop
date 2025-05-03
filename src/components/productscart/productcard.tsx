@@ -34,13 +34,12 @@ export default function ProductCard({ product, isFirst = false }: { product: Pro
   return (
     <div className={styles.container}>
       <div className={styles.imageWrapper}>
-  {product.image ? (
+      {product.image ? (
     <Image
       src={product.image}
       alt={String(product.title)}
       fill
       priority={isFirst}
- 
       sizes="(max-width: 968px) 100vw, (max-width: 1400px) 50vw, 33vw"
       className={styles.image}
     />
@@ -48,7 +47,6 @@ export default function ProductCard({ product, isFirst = false }: { product: Pro
     <div className={styles.imageFallback} />
   )}
 </div>
-
       {/* Content */}
       <div className={styles.content}>
         <h1 className={styles.title}>{product.title}</h1>

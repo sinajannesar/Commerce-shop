@@ -252,7 +252,6 @@ describe('LoginForm - POM style', () => {
       try {
         expect(loginPage.getLoadingIndicator()).not.toBeInTheDocument();
       } catch  {
-        // If not found, that's okay too
       }
       expect(loginPage.getSubmitButton()).not.toBeDisabled();
     });

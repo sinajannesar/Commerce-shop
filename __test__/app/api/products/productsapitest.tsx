@@ -1,190 +1,141 @@
-// __test__/app/api/products/productsapitest.tsx
-import { createClient } from 'redis';
-import { Product } from '../../../../src/types/types';
-import { vi } from 'vitest';
-import { Mock } from 'vitest';
+// pages/ProductPage.ts
+import supertest from 'supertest';
+
+// Define interfaces for better TypeScript support
+export interface Product {
+  id: number;
+  title: string;
+  category?: string;
+  price: number;
+  description?: string;
+  image?: string;
+}
+
+export interface ApiResponse<T> {
+  status: number;
+  data: T;
+  headers: Record<string, string>;
+}
+
+export interface CacheResult {
+  isCached: boolean;
+  firstCallTime: number;
+  secondCallTime: number;
+}
+
+export interface CategoryMap {
+  [category: string]: Product[];
+}
 
 /**
- * Page Object Model for Products API interactions
+ * Page Object Model for Products API
+ * Encapsulates all product-related API interactions
  */
-export class ProductsApiPage {
-  private redisClient: ReturnType<typeof createClient>;
-  private mockFetch: Mock;
-  private mockRedisGet: Mock;
-  private mockRedisSet: Mock;
-  private mockRedisIsOpen: ReturnType<typeof vi.spyOn>;
-  private mockRedisConnect: Mock;
-  private mockRedisOn: Mock;
-  private originalFetch: typeof global.fetch;
+class ProductPage {
+  // Fix: Use the exact type returned by supertest
+  private request: ReturnType<typeof supertest>;
   
-  constructor() {
-    // Store original fetch
-    this.originalFetch = global.fetch;
-    
-    // Setup mock redis client
-    this.mockRedisGet = vi.fn();
-    this.mockRedisSet = vi.fn();
-    this.mockRedisConnect = vi.fn().mockResolvedValue(undefined);
-    this.mockRedisOn = vi.fn();
-    
-    // Setup Redis client mock
-    this.redisClient = {
-      get: this.mockRedisGet,
-      set: this.mockRedisSet,
-      connect: this.mockRedisConnect,
-      on: this.mockRedisOn,
-      isOpen: false
-    } as unknown as ReturnType<typeof createClient>;
-    
-    // Mock isOpen property
-    this.mockRedisIsOpen = vi.spyOn(this.redisClient, 'isOpen', 'get');
-    
-    // Setup fetch mock
-    this.mockFetch = vi.fn();
-  }
-
-  // Add these getter methods to provide access to the mock functions
-  public getMockFetch(): Mock {
-    return this.mockFetch;
-  }
-
-  public getMockRedisGet(): Mock {
-    return this.mockRedisGet;
+  constructor(baseUrl: string = process.env.BASE_URL || 'http://localhost:3000') {
+    this.request = supertest(baseUrl);
   }
 
   /**
-   * Initialize the test environment
+   * Fetches all products from the API
+   * @returns Promise with response containing status and data
    */
-  async setup() {
-    // Mock redis
-    vi.mock('redis', () => ({
-      createClient: vi.fn().mockImplementation(() => this.redisClient)
-    }));
-    
-    // Mock fetch
-    global.fetch = this.mockFetch;
-    
-    // Mock environment variables
-    process.env.REDIS_URL = 'redis://test-redis:6379';
-    
-    // Clear mock call history
-    this.resetMocks();
-    
-    // Make sure redis.createClient returns the mock with 'on' properly defined
-    const redis = await import('redis');
-    (redis.createClient as Mock).mockReturnValue(this.redisClient);
+  async getAllProducts(): Promise<ApiResponse<Product[]>> {
+    try {
+      const response = await this.request.get('/api/products');
+      return {
+        status: response.status,
+        data: response.body as Product[],
+        headers: response.headers as Record<string, string>
+      };
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      throw error;
+    }
   }
 
   /**
-   * Reset all mocks to their initial state
+   * Gets a product by its ID
+   * @param id - Product ID to fetch
+   * @returns Product if found, null otherwise
    */
-  resetMocks() {
-    this.mockRedisGet.mockReset();
-    this.mockRedisSet.mockReset();
-    this.mockRedisConnect.mockReset().mockResolvedValue(undefined);
-    this.mockRedisOn.mockReset();
-    this.mockFetch.mockReset();
-    this.mockRedisIsOpen.mockReturnValue(false);
-  }
-
-  /**
-   * Clean up after tests
-   */
-  async teardown() {
-    global.fetch = this.originalFetch;
-    vi.restoreAllMocks();
-    vi.resetModules();
-  }
-
-  /**
-   * Mock Redis to return cached API products
-   */
-  mockCachedApiProducts(products: Product[]) {
-    this.mockRedisGet.mockImplementation((redisKey: string) => {
-      if (redisKey === 'api:products') {
-        return Promise.resolve(JSON.stringify(products));
+  async getProductById(id: number): Promise<Product | null> {
+    try {
+      const response = await this.getAllProducts();
+      if (response.status !== 200) {
+        return null;
       }
-      if (redisKey === 'local:products') {
-        return Promise.resolve(JSON.stringify([]));
+      
+      return response.data.find(product => product.id === id) || null;
+    } catch (error) {
+      console.error(`Error fetching product with ID ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Checks if API cache is working by measuring response times
+   * @returns Result indicating if caching is working
+   */
+  async verifyRedisCache(): Promise<CacheResult> {
+    try {
+      // First call - might not be cached
+      const startTime1 = Date.now();
+      await this.getAllProducts();
+      const firstCallTime = Date.now() - startTime1;
+      
+      // Small delay
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Second call - should be cached
+      const startTime2 = Date.now();
+      await this.getAllProducts();
+      const secondCallTime = Date.now() - startTime2;
+      
+      // If cache is working, second call should be significantly faster
+      return {
+        isCached: secondCallTime < firstCallTime * 0.8, // 20% faster is considered cached
+        firstCallTime,
+        secondCallTime
+      };
+    } catch (error) {
+      console.error('Error verifying Redis cache:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Gets the total count of products
+   * @returns Total product count
+   */
+  async getProductCount(): Promise<number> {
+    const response = await this.getAllProducts();
+    return response.data.length;
+  }
+
+  /**
+   * Groups products by category
+   * @returns Products grouped by category
+   */
+  async getProductsByCategory(): Promise<CategoryMap> {
+    const response = await this.getAllProducts();
+    
+    if (response.status !== 200) {
+      throw new Error(`Failed to get products: ${response.status}`);
+    }
+    
+    return response.data.reduce<CategoryMap>((categories, product) => {
+      const category = product.category || 'uncategorized';
+      if (!categories[category]) {
+        categories[category] = [];
       }
-      return Promise.resolve(null);
-    });
-  }
-
-  /**
-   * Mock Redis to return no cached API products but with local products
-   */
-  mockLocalProducts(products: Product[]) {
-    this.mockRedisGet.mockImplementation((redisKey: string) => {
-      if (redisKey === 'api:products') {
-        return Promise.resolve(null);
-      }
-      if (redisKey === 'local:products') {
-        return Promise.resolve(JSON.stringify(products));
-      }
-      return Promise.resolve(null);
-    });
-  }
-
-  /**
-   * Mock Redis to return both cached API products and local products
-   */
-  mockCombinedProducts(apiProducts: Product[], localProducts: Product[]) {
-    this.mockRedisGet.mockImplementation((redisKey: string) => {
-      if (redisKey === 'api:products') {
-        return Promise.resolve(JSON.stringify(apiProducts));
-      }
-      if (redisKey === 'local:products') {
-        return Promise.resolve(JSON.stringify(localProducts));
-      }
-      return Promise.resolve(null);
-    });
-  }
-
-  /**
-   * Mock Redis to return no products at all
-   */
-  mockNoProducts() {
-    this.mockRedisGet.mockImplementation(() => {
-      return Promise.resolve(null);
-    });
-  }
-
-  /**
-   * Mock fetch API to return products
-   */
-  mockApiResponse(products: Product[], status = 200) {
-    this.mockFetch.mockResolvedValue({
-      ok: status === 200,
-      status,
-      json: () => Promise.resolve(products)
-    });
-  }
-
-  /**
-   * Mock Redis to be already connected
-   */
-  mockRedisAlreadyConnected() {
-    this.mockRedisIsOpen.mockReturnValue(true);
-  }
-
-  /**
-   * Mock Redis connection failure
-   */
-  mockRedisConnectionFailure(error: Error) {
-    this.mockRedisConnect.mockRejectedValue(error);
-  }
-
-  /**
-   * Mock API fetch failure
-   */
-  mockApiFetchFailure(status = 500) {
-    this.mockFetch.mockResolvedValue({
-      ok: false,
-      status
-    });
+      categories[category].push(product);
+      return categories;
+    }, {});
   }
 }
 
-// Export the page object model class
-export default ProductsApiPage;
+export default ProductPage;

@@ -60,12 +60,15 @@ export default function RegisterForm() {
       });
 
       if (response.ok) {
-        await signIn('credentials', {
+        const resalt = await signIn('credentials', {
           email: validation.data.email,
           password: validation.data.password,
           callbackUrl: '/dashboard',
+          redirect: false
         });
-        router.push("/dashboard");
+        if (resalt?.ok) {
+          router.push("/dashboard");
+        }
       } else {
         const data = await response.json();
         alert(data.error || 'Registration failed. Please try again.');
