@@ -1,15 +1,20 @@
-"use client"
-import "../globals.css";
 import { ReactNode } from "react";
-import Sidebar from "@/components/sidebar/sidebar"
-import { SessionProvider } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/authOption"; // اگر authOptions داری
+import { getServerSession } from "next-auth";
+import Sidebar from "@/components/sidebar/sidebar";
 
+export default async function DashboardLayout({ children }: { children: ReactNode }) {
+  const session = await getServerSession(authOptions);
 
-export default function RootLayout({ children }: { children: ReactNode }) {
-    return (
-        <SessionProvider>
-            <Sidebar />
-            {children}
-        </SessionProvider>
-    );
+  if (!session) {
+    redirect("/");
+  }
+
+  return (
+    <div className="flex">
+      <Sidebar />
+      <main className="flex-1">{children}</main>
+    </div>
+  );
 }

@@ -38,9 +38,6 @@ export async function GET() {
 }
 
 
-
-
-
 export async function PUT(request: Request) {
   const session = await getServerSession(authOptions);
   
@@ -62,13 +59,11 @@ export async function PUT(request: Request) {
       );
     }
     
-    // دریافت داده‌های جدید از بدن درخواست
     const updatedUser = await request.json();
 
-    // به‌روزرسانی کاربر
-    Object.assign(user, updatedUser);  // به‌روزرسانی کاربر با داده‌های جدید
+    Object.assign(user, updatedUser);  
 
-    await writeUsersDb(db);  // ذخیره تغییرات در دیتابیس
+    await writeUsersDb(db); 
 
     return NextResponse.json(user);
   } catch (error) {

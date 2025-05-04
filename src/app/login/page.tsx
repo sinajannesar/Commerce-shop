@@ -11,10 +11,10 @@ export default function LoginPage() {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <div className={`min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 `}>
+            <div className={`min-h-screen bg-gradient-to-br  to-indigo-500 flex flex-col justify-center py-12 sm:px-6 lg:px-8 `}>
                 <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome </h1>
-                    <p className="text-gray-600">Sign in to your account</p>
+                    <p className="text-gray-900">Sign in to your account</p>
                 </div>
 
                 <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

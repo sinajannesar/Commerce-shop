@@ -14,9 +14,11 @@ const ProfileHeader = dynamic(() => import("@/components/profile/ProfileHeader")
 const ProfileInfoItem = dynamic(() => import("@/components/profile/ProfileInfoItem"), { ssr: false });
 const MMProfileModal = dynamic(() => import("@/components/profile/MMProfileModal"), {ssr:false})
 export default function ProfilePage() {
+
   const { status } = useSession();
   const [user, setUser] = useState<User | null>(null);
 
+  
   
   useEffect(() => {
     if (status === "authenticated") {
