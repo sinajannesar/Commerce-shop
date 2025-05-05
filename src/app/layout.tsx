@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import NavigationWrapper from "@/components/header/navigationWrapper";
 import "./globals.css";
 import ToasterProvider from "./tosterproviders";
-// import { SessionProvider } from "next-auth/react";
-// import AuthProvider from "@/components/AuthProvider";
 import { AuthProvider } from "@/components/providers"
 
 export const metadata: Metadata = {

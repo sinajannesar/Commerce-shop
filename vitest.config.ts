@@ -5,13 +5,17 @@ import path from 'path';
 export default defineConfig({
   test: {
     environment: 'jsdom',
-    setupFiles: './vitest.setup.ts',
     globals: true,
+    setupFiles: ['./vitest.setup.ts'],
+    include: ['**/*.test.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+    },
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './'),
-      '@/app/api/products/route': path.resolve(__dirname, '../../../../src/app/api/products/route.ts')
+      '@': path.resolve(__dirname, './src')
     }
   }
 });

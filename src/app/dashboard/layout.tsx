@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/authOption"; // اگر authOptions داری
+import { authOptions } from "@/lib/authOption"; 
 import { getServerSession } from "next-auth";
 import Sidebar from "@/components/sidebar/sidebar";
 

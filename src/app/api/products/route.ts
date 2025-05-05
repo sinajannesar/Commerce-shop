@@ -66,7 +66,7 @@ async function fetchProducts(): Promise<Product[]> {
       
       if (cachedApiProducts) {
         apiProducts = JSON.parse(cachedApiProducts);
-        console.log("API products loaded from Redis cache");
+        console.log("API produc tsloaded from Redis cache");
       } else {
         apiProducts = await fetchApiProducts();
         

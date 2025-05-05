@@ -13,14 +13,18 @@ const PriceFilter = ({ priceRange, setPriceRange, products }) => {
     };
   }, [prices]);
 
+  const formatPriceForA11y = (price) => `$${price}`;
+
   return (
     <div className="p-5">
-      <h3 className="text-lg font-medium text-white mb-5 flex items-center">
+      {/* Changed from h2 to h3 to match the heading hierarchy */}
+      <h3 className="text-lg font-medium text-white mb-5 flex items-center" id="price-range-heading">
         <svg
           className="w-5 h-5 mr-2 text-blue-400"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
         >
           <path
             d="M12 6V4M12 6C10.8954 6 10 6.89543 10 8C10 9.10457 10.8954 10 12 10C13.1046 10 14 10.8954 14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12M12 6C13.1046 6 14 6.89543 14 8M12 18C12.5523 18 13 17.5523 13 17C13 16.4477 12.5523 16 12 16C11.4477 16 11 16.4477 11 17C11 17.5523 11.4477 18 12 18ZM12 18C12 18 12 18 12 18ZM12 14V16M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
@@ -62,13 +66,28 @@ const PriceFilter = ({ priceRange, setPriceRange, products }) => {
           backgroundColor: '#2A3454',
           height: '6px'
         }}
+        // Add accessible names for screen readers
+        ariaLabelForHandle={['Minimum price', 'Maximum price']}
+        ariaLabelledByForHandle={['min-price-label', 'max-price-label']}
+        // Reference the heading ID to associate the slider with the heading
+        aria-labelledby="price-range-heading"
+        // Provide accessible value text for each handle
+        ariaValueTextFormatterForHandle={(value) => formatPriceForA11y(value)}
       />
 
       <div className="flex justify-between mt-6">
-        <div className="bg-[#131B30] backdrop-blur-sm border border-[#2A3454]/80 px-4 py-2 rounded-lg font-medium text-white">
+        <div 
+          className="bg-[#131B30] backdrop-blur-sm border border-[#2A3454]/80 px-4 py-2 rounded-lg font-medium text-white"
+          id="min-price-label"
+          aria-live="polite"
+        >
           ${priceRange[0]}
         </div>
-        <div className="bg-[#131B30] backdrop-blur-sm border border-[#2A3454]/80 px-4 py-2 rounded-lg font-medium text-white">
+        <div 
+          className="bg-[#131B30] backdrop-blur-sm border border-[#2A3454]/80 px-4 py-2 rounded-lg font-medium text-white"
+          id="max-price-label"
+          aria-live="polite"
+        >
           ${priceRange[1]}
         </div>
       </div>

@@ -28,7 +28,7 @@ export default function ProfilePage() {
     }
   }, [status]);
 
-  if (status === "loading" || !user ) return <Loading />;
+  if (status === "loading" || !user ) return <Loading />; // can you delete || !user  because <Nodata/> not show 
   if (status === "unauthenticated") return <Unauthenticated />;
   if (!user) return <NoData/>
 

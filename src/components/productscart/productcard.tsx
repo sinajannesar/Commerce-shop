@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { Product } from '@/types/types'
-import {  useState } from 'react'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useCartStore } from '../../lib/store/useCartStore'
 import styles from './ProductCard.module.css'
@@ -24,7 +24,7 @@ export default function ProductCard({ product, isFirst = false }: { product: Pro
       })
 
       toast.success(`Added ${product.title} to cart`)
-    } catch  {
+    } catch {
       toast.error('Something went wrong')
     } finally {
       setIsLoading(false)
@@ -34,19 +34,20 @@ export default function ProductCard({ product, isFirst = false }: { product: Pro
   return (
     <div className={styles.container}>
       <div className={styles.imageWrapper}>
-      {product.image ? (
-    <Image
-      src={product.image}
-      alt={String(product.title)}
-      fill
-      priority={isFirst}
-      sizes="(max-width: 968px) 100vw, (max-width: 1400px) 50vw, 33vw"
-      className={styles.image}
-    />
-  ) : (
-    <div className={styles.imageFallback} />
-  )}
-</div>
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={String(product.title)}
+            fill
+            priority={isFirst}
+            sizes="(max-width: 968px) 100vw, (max-width: 1400px) 50vw, 33vw"
+            className={styles.image}
+            quality={40}
+          />
+        ) : (
+          <div className={styles.imageFallback} />
+        )}
+      </div>
       {/* Content */}
       <div className={styles.content}>
         <h1 className={styles.title}>{product.title}</h1>

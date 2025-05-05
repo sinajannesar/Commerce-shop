@@ -65,7 +65,7 @@ export function CartModal({ onClose }: CartModalProps) {
                   <span className="ml-2 text-gray-500">x{item.quantity}</span>
                 </div>
                 <div className="flex items-center">
-                  <span className="font-semibold mr-3">${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-semibold mr-1">${(item.price * item.quantity).toFixed(2)}</span>
                   <button onClick={() => updateQuantity(item.name)} className="p-1 mr-2 text-purple-600 hover:text-purple-800">
                     +
                   </button>

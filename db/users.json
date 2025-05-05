@@ -94,6 +94,19 @@
       "address": "نیشابور",
       "nashionalcode": "2222222",
       "createdAt": "2025-05-03T14:33:51.255Z"
+    },
+    {
+      "id": "9cac4578-3066-481d-bebb-43241780e159",
+      "firstname": "afshin",
+      "lastname": "safa",
+      "phonenumber": "090123456789",
+      "email": "sadfchdsauif@gmail.com",
+      "password": "987654321",
+      "postalcode": "45645645",
+      "city": "neyshabor",
+      "address": "نیشابور",
+      "nashionalcode": "2022222222",
+      "createdAt": "2025-05-05T05:55:15.788Z"
     }
   ],
   "orders": [
@@ -111,6 +124,5 @@
       "status": "processing",
       "createdAt": "2025-04-26T07:40:42.525Z"
     }
-   
   ]
 }

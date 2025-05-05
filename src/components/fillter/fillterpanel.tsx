@@ -105,6 +105,7 @@ export default function FilterPanel({
               </div>
               <input
                 type="text"
+                aria-label="Search products"
                 placeholder="Search products..."
                 onChange={handleSearch}
                 value={inputValue}

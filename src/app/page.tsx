@@ -92,7 +92,8 @@ export default function ProductsPage() {
     { 
       revalidateOnFocus: false,
       revalidateIfStale: false,
-      keepPreviousData: true 
+      keepPreviousData: true,
+      dedupingInterval: 60000
     }
   );
 
