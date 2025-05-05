@@ -18,12 +18,13 @@ const PriceFilter = ({ priceRange, setPriceRange, products }) => {
 
   return (
     <div className="p-5">
-      <h3 className="text-lg font-medium text-white mb-5 flex items-center">
+      <h1 className="text-lg font-medium text-white mb-5 flex items-center">
         <FiSearch className="w-5 h-5 mr-2 text-blue-400" />
         Price Range
-      </h3>
+      </h1>
       <Slider
         range
+        aria-label="Price Range"
         min={priceBounds.min}
         max={priceBounds.max}
         value={priceRange}
