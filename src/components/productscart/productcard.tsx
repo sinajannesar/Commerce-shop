@@ -39,6 +39,7 @@ export default function ProductCard({ product, isFirst = false }: { product: Pro
             src={product.image}
             alt={String(product.title)}
             fill
+            unoptimized
             priority={isFirst}
             sizes="(max-width: 968px) 100vw, (max-width: 1400px) 50vw, 33vw"
             className={styles.image}
