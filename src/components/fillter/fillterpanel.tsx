@@ -25,6 +25,7 @@ const PriceFilter = ({ priceRange, setPriceRange, products }) => {
       <Slider
         range
         aria-label="Price Range"
+        aria-labelledby="price-range-label"
         min={priceBounds.min}
         max={priceBounds.max}
         value={priceRange}
@@ -35,7 +36,14 @@ const PriceFilter = ({ priceRange, setPriceRange, products }) => {
           { borderColor: '#818cf8', backgroundColor: '#fff', boxShadow: '0 0 0 3px rgba(99, 102, 241, 0.3)', width: '18px', height: '18px', marginTop: '-6px' },
         ]}
         railStyle={{ backgroundColor: '#2A3454', height: '6px' }}
+        ariaLabelForHandle={['Minimum price', 'Maximum price']}
+        ariaValueTextFormatterForHandle={[
+          (value) => `Minimum price: ${value}`,
+          (value) => `Maximum price: ${value}`
+        ]}
       />
+      {/* Add a hidden but screen-reader accessible label */}
+      <span id="price-range-label" className="sr-only">Price Range Selector</span>
       <div className="flex justify-between mt-6">
         <div className="bg-[#131B30] backdrop-blur-sm border border-[#2A3454]/80 px-4 py-2 rounded-lg font-medium text-white">
           ${priceRange[0]}
