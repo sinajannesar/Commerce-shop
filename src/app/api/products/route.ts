@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { Product } from "@/types/types";
 import { createClient } from "redis";
 
-// Redis client setup
 const redisClient = createClient({
   url: process.env.REDIS_URL || "redis://localhost:6379",
 });

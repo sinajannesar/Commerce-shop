@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 import { useCartStore } from '../../lib/store/useCartStore'
 import styles from './ProductCard.module.css'
 
-export default function ProductCard({ product, isFirst = false }: { product: Product, isFirst?: boolean }) {
+export default function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCartStore()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -35,21 +35,24 @@ export default function ProductCard({ product, isFirst = false }: { product: Pro
     <div className={styles.container}>
       <div className={styles.imageWrapper}>
         {product.image ? (
-          <Image
-            src={product.image}
-            alt={String(product.title)}
-            fill
-            unoptimized
-            priority={isFirst}
-            sizes="(max-width: 968px) 100vw, (max-width: 1400px) 50vw, 33vw"
-            className={styles.image}
-            quality={40}
-          />
+          <div className="relative w-full aspect-[3/4]">
+            <Image
+              src={product.image}
+              alt={product.title}
+              fill
+              className="object-contain"
+              quality={70}
+              priority={true}
+              placeholder="empty"
+              blurDataURL="data:image/svg+xml;base64,..."
+            />
+          </div>
         ) : (
           <div className={styles.imageFallback} />
         )}
       </div>
-      {/* Content */}
+
+
       <div className={styles.content}>
         <h1 className={styles.title}>{product.title}</h1>
         <p className={styles.description}>{product.description}</p>
@@ -57,7 +60,6 @@ export default function ProductCard({ product, isFirst = false }: { product: Pro
           Price: <span className={styles.priceValue}>${product.price.toLocaleString()}</span>
         </p>
 
-        {/* Add to Cart Button */}
         <button
           onClick={handleClick}
           disabled={isLoading}

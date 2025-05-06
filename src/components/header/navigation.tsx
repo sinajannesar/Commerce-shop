@@ -71,7 +71,7 @@ export default function Navbar() {
       </nav>
 
       {/* Cart Modal */}
-      {isModalOpen && <CartModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && <CartModal onClose={() => setIsModalOpen(false)}   aria-label="Open menu" />}
     </>
   )
 }

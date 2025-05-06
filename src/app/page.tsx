@@ -11,13 +11,17 @@ import { useMemo } from 'react';
 const ErrorMessage = dynamic(() => import('@/components/page/ErrorMessage'), { ssr: false });
 const NoProductsFound = dynamic(() => import('@/components/page/NoProductsFound'), { ssr: false });
 const LoadingSpinner = dynamic(() => import('@/components/page/LoadingSpinner'), { ssr: false });
+
 const FilterPanelSkeleton = dynamic(() => import('@/components/page/FilterPanelSkeleton'), { ssr: false });
 
 const FilterPanel = dynamic(() => import('@/components/fillter/fillterpanel'), {
   ssr: false,
   loading: () => <FilterPanelSkeleton />
 })
-const ProductCard = dynamic(() => import('@/components/productscart/productcard'));
+const ProductCard = dynamic(() => import('@/components/productscart/productcard'), {
+  ssr: false,
+
+});
 
 const fetcher = (url) => fetch(url).then(res => res.json());
 
@@ -36,7 +40,6 @@ export default function ProductsPage() {
   const { searchQuery, priceRange, setSearchQuery, setPriceRange } = useFilterStore();
   const [filterVisible, setFilterVisible] = useState(false);
 
-  // Use useEffect with proper dependencies
   useEffect(() => {
     if (products.length > 0) {
       const prices = products.map((p) => p.price);
@@ -46,7 +49,6 @@ export default function ProductsPage() {
     }
   }, [products, setPriceRange]);
 
-  // Memoize filtered products to prevent recalculation
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesSearch = searchQuery.length === 0 ||
@@ -56,17 +58,14 @@ export default function ProductsPage() {
     });
   }, [products, searchQuery, priceRange]);
 
-  // Handle loading state
   if (isLoading) {
     return <LoadingSpinner />;
   }
 
-  // Handle error state
   if (error) {
     return <ErrorMessage />;
   }
 
-  // Render main content
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0C1222] via-[#0F1628] to-[#131B30] text-gray-200 mt-15">
       <div className="container mx-auto px-4 py-8">
@@ -94,17 +93,28 @@ export default function ProductsPage() {
           />
 
           <div className="md:w-3/4">
-            {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredProducts.map((product) => (
-                  <div key={product.id} className="relative" aria-labelledby={`product-${product.id}`}>
-                    <ProductCard product={product} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <NoProductsFound />
-            )}
+            <div className="min-h-[500px] w-full">
+              {filteredProducts.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="relative aspect-w-1 aspect-h-1"
+                      aria-labelledby={`product-${product.id}`}
+                      style={{ contain: 'layout' }}
+                    >
+                      <div className="w-full h-full">
+                        <ProductCard product={product} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <NoProductsFound />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

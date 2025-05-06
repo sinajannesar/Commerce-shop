@@ -26,7 +26,7 @@
   overflow: hidden;
   border-radius: 0.75rem;
   background: #fff;
-  min-height: 300px; /* تثبیت اندازه تصویر برای جلوگیری از layout shift */
+  min-height: 200px; 
 }
 
 .image {
@@ -65,7 +65,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 2.5rem; /* حفظ ارتفاع برای جلوگیری از لرزش */
+  min-height: 2.5rem; 
 }
 
 .description {
@@ -75,7 +75,7 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 3.5rem; /* جلوگیری از تغییر ارتفاع */
+  min-height: 3.5rem;
 }
 
 .price {
@@ -109,7 +109,7 @@
   background: rgba(75, 85, 99, 0.5);
   cursor: not-allowed;
   font-size: 0.875rem;
-  padding: 0.75rem; /* حفظ اندازه حتی در حالت غیرفعال */
+  padding: 0.75rem; 
 }
 
 @keyframes pulse {
