@@ -91,7 +91,7 @@ async function refreshCache(): Promise<Product[]> {
   return apiProducts;
 }
 
-async function fetchProducts(): Promise<Product[]> {
+export async function fetchProducts(): Promise<Product[]> {
   let apiProducts: Product[] = [];
   let localProducts: Product[] = [];
   
