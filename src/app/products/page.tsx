@@ -1,14 +1,17 @@
 import React from 'react';
 import { Product } from '@/types/types';
 import ProductsList from './clientproducts';
-import { fetchProducts  } from "@/app/api/products/route"; 
+import { fetchProducts  } from "@/app/api/products/route";
+import dynamic from 'next/dynamic';
+
+const NoProductsFound = dynamic(() => import('@/components/page/NoProductsFound'), { ssr: true });
 
 export default async function ProductsPage() {
     const products: Product[] = await fetchProducts();
     if (!products || products.length === 0) {
         return (
-          <div className="min-h-screen flex items-center justify-center text-white">
-            <p>No products found.</p>
+            <div className="w-full h-full flex items-center justify-center">
+            <NoProductsFound  />
           </div>
         );
       }

@@ -42,7 +42,6 @@ export default function ProductCard({ product }: { product: Product }) {
               fill
               className="object-contain"
               quality={70}
-              priority={true}
               placeholder="empty"
               blurDataURL="data:image/svg+xml;base64,..."
             />

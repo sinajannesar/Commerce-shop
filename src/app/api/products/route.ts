@@ -31,9 +31,8 @@ const KEYS = {
   LAST_REFRESH_TIME: "api:last_refresh_time"
 };
 
-// Cache settings
-const API_CACHE_TTL = 3600; // 1 hour TTL for Redis cache
-const CACHE_REFRESH_INTERVAL = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+const API_CACHE_TTL = 3600; 
+const CACHE_REFRESH_INTERVAL = 12 * 60 * 60 * 1000; 
 
 async function fetchApiProducts(): Promise<Product[]> {
   console.log("Fetching products from external API");
@@ -70,7 +69,7 @@ async function shouldRefreshCache(): Promise<boolean> {
     return (currentTime - lastRefresh) >= CACHE_REFRESH_INTERVAL;
   } catch (error) {
     console.error("Error checking cache refresh time:", error);
-    return true; // If there's an error, refresh to be safe
+    return true; 
   }
 }
 
@@ -99,20 +98,17 @@ export async function fetchProducts(): Promise<Product[]> {
     await connectRedis();
     
     try {
-      // Check if we need to refresh the cache
       const needsRefresh = await shouldRefreshCache();
       
       if (needsRefresh) {
         apiProducts = await refreshCache();
       } else {
-        // Try to get from cache first
         const cachedApiProducts = await redisClient.get(KEYS.API_PRODUCTS);
         
         if (cachedApiProducts) {
           apiProducts = JSON.parse(cachedApiProducts);
           console.log("API products loaded from Redis cache");
         } else {
-          // Cache miss, fetch and store
           apiProducts = await fetchApiProducts();
           
           try {

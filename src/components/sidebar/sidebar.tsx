@@ -38,7 +38,7 @@ export default function ProfessionalSidebar() {
             icon: <ShoppingBag size={20} />,
             path: "/products",
             submenu: [
-                { name: "All Products", path: "/" },
+                { name: "All Products", path: "/products" },
                 { name: "Add Product", path: "/products/add" },
             
             ],

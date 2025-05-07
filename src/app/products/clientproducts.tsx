@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Product } from '@/types/types';
 import dynamic from 'next/dynamic';
 import { useProductFilter } from '@/lib/hooks/useproductsfillter';
+
 const FilterPanelSkeleton = dynamic(() => import('@/components/page/FilterPanelSkeleton'), { ssr: true });
 
 const NoProductsFound = dynamic(() => import('@/components/page/NoProductsFound'), { ssr: true });

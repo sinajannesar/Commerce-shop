@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { User } from "@/types/types";
 import { MailIcon, PhoneIcon, MapPinIcon } from "lucide-react";
-
+import ProfileInfoItem from "@/components/profile/ProfileInfoItem";
 
 const Loading = dynamic(() => import("@/components/profile/Loading"), { ssr: false });
 const Unauthenticated = dynamic(() => import("@/components/profile/Unauthenticated"), { ssr: false });
 const NoData = dynamic(() => import("@/components/profile/NoData"), { ssr: false });
-const ProfileHeader = dynamic(() => import("@/components/profile/ProfileHeader"), { ssr: false });
-const ProfileInfoItem = dynamic(() => import("@/components/profile/ProfileInfoItem"), { ssr: false });
+const ProfileHeader = dynamic(() => import("@/components/profile/ProfileHeader"), { ssr: true });
 const MMProfileModal = dynamic(() => import("@/components/profile/MMProfileModal"), {ssr:false})
+
 export default function ProfilePage() {
 
   const { status } = useSession();
@@ -28,7 +28,7 @@ export default function ProfilePage() {
     }
   }, [status]);
 
-  if (status === "loading" || !user ) return <Loading />; // can you delete || !user  because <Nodata/> not show 
+  if (status === "loading" || !user ) return <Loading />; 
   if (status === "unauthenticated") return <Unauthenticated />;
   if (!user) return <NoData/>
 
