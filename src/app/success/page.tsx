@@ -2,13 +2,14 @@
 
 import { useCartStore } from '@/lib/store/useCartStore'
 import Link from 'next/link'
-
+import { useEffect } from 'react'
 
 export default function SuccessPage() {
   const { clearCart } = useCartStore()
-  clearCart()
 
-
+  useEffect(() => {
+    clearCart()
+  }, [clearCart])
 
   return (
     <div className="min-h-screen bg-[#0C1222] text-gray-200 pt-24 flex items-center justify-center">
@@ -29,15 +30,18 @@ export default function SuccessPage() {
 
         <Link 
         href='/'
-        onClick={() => clearCart()}
            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-5 rounded-lg transition-colors"
         >
           Continue Shopping
         </Link>
       </div>
       
-     
-      
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   )
 }
