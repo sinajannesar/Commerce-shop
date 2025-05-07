@@ -1,18 +1,14 @@
 "use client"
 
 import { useCartStore } from '@/lib/store/useCartStore'
-import { redirect } from 'next/navigation'
-
+import Link from 'next/link'
 
 
 export default function SuccessPage() {
   const { clearCart } = useCartStore()
-
   clearCart()
 
-  const handleContinueShopping = () => {
-    redirect('/')
-  }
+
 
   return (
     <div className="min-h-screen bg-[#0C1222] text-gray-200 pt-24 flex items-center justify-center">
@@ -31,20 +27,17 @@ export default function SuccessPage() {
           Thank you for your purchase.
         </p>
 
-        <button 
-          onClick={handleContinueShopping}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-5 rounded-lg transition-colors"
+        <Link 
+        href='/'
+        onClick={() => clearCart()}
+           className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-5 rounded-lg transition-colors"
         >
           Continue Shopping
-        </button>
+        </Link>
       </div>
       
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+     
+      
     </div>
   )
 }
