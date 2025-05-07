@@ -1,120 +1,51 @@
-'use client'
-
-import React, { useState, useEffect } from 'react';
-import { Product } from '@/types/types';
-import dynamic from 'next/dynamic';
-import { useFilterStore } from '@/lib/store/usefillterstore';
-import useSWR from 'swr';
-import { useMemo } from 'react';
 
 
-const ErrorMessage = dynamic(() => import('@/components/page/ErrorMessage'), { ssr: false });
-const NoProductsFound = dynamic(() => import('@/components/page/NoProductsFound'), { ssr: false });
-const LoadingSpinner = dynamic(() => import('@/components/page/LoadingSpinner'), { ssr: false });
+import Link from "next/link";
 
-const FilterPanelSkeleton = dynamic(() => import('@/components/page/FilterPanelSkeleton'), { ssr: false });
-
-const FilterPanel = dynamic(() => import('@/components/fillter/fillterpanel'), {
-  ssr: false,
-  loading: () => <FilterPanelSkeleton />
-})
-const ProductCard = dynamic(() => import('@/components/productscart/productcard'), {
-  ssr: false,
-
-});
-
-const fetcher = (url) => fetch(url).then(res => res.json());
-
-export default function ProductsPage() {
-  const { data: products = [], error, isLoading } = useSWR<Product[]>(
-    '/api/products',
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateIfStale: false,
-      keepPreviousData: true,
-      dedupingInterval: 60000
-    }
-  );
-
-  const { searchQuery, priceRange, setSearchQuery, setPriceRange } = useFilterStore();
-  const [filterVisible, setFilterVisible] = useState(false);
-
-  useEffect(() => {
-    if (products.length > 0) {
-      const prices = products.map((p) => p.price);
-      const minPrice = Math.floor(Math.min(...prices));
-      const maxPrice = Math.ceil(Math.max(...prices));
-      setPriceRange([minPrice, maxPrice]);
-    }
-  }, [products, setPriceRange]);
-
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesSearch = searchQuery.length === 0 ||
-        product.title.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-      return matchesSearch && matchesPrice;
-    });
-  }, [products, searchQuery, priceRange]);
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
-  if (error) {
-    return <ErrorMessage />;
-  }
-
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0C1222] via-[#0F1628] to-[#131B30] text-gray-200 mt-15">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">
+      {/* Main Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-blue-500 to-indigo-400">
-              Discover Premium Products
+              Welcome to Our Online Store
             </span>
           </h1>
-          <p className="text-base text-gray-400 max-w-2xl mx-auto">
-            Find the perfect item with our exclusive collection
+          
+          <p className="text-xl text-gray-400 mb-8">
+            We offer a wide range of products for all your needs.
+            From electronics to clothing, home goods to accessories - everything you need in one place.
           </p>
+          
+          <div className="flex justify-center gap-4">
+            <Link href="/products" className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:opacity-90">
+              Shop Now
+            </Link>
+            <Link href="/contact" className="px-8 py-4 bg-transparent border border-blue-500 text-blue-400 font-medium rounded-lg hover:bg-blue-900 hover:bg-opacity-20">
+              Contact Us
+            </Link>
+          </div>
         </div>
-
-        <div className="flex flex-col md:flex-row gap-4">
-          <FilterPanel
-            products={products}
-            filterVisible={filterVisible}
-            setFilterVisible={setFilterVisible}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            filteredProducts={filteredProducts}
-          />
-
-          <div className="md:w-3/4">
-            <div className="min-h-[500px] w-full">
-              {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      className="relative aspect-w-1 aspect-h-1"
-                      aria-labelledby={`product-${product.id}`}
-                      style={{ contain: 'layout' }}
-                    >
-                      <div className="w-full h-full">
-                        <ProductCard product={product} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <NoProductsFound />
-                </div>
-              )}
-            </div>
+      </div>
+      
+      {/* Features Section */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="bg-[#1A2237] p-6 rounded-xl text-center">
+            <h3 className="text-xl font-semibold mb-3 text-blue-400">Fast Shipping</h3>
+            <p className="text-gray-400">Quick delivery to any location with our premium shipping service</p>
+          </div>
+          
+          <div className="bg-[#1A2237] p-6 rounded-xl text-center">
+            <h3 className="text-xl font-semibold mb-3 text-blue-400">Secure Payment</h3>
+            <p className="text-gray-400">Shop with confidence using our secure payment methods</p>
+          </div>
+          
+          <div className="bg-[#1A2237] p-6 rounded-xl text-center">
+            <h3 className="text-xl font-semibold mb-3 text-blue-400">Quality Guarantee</h3>
+            <p className="text-gray-400">All products come with quality assurance and warranty</p>
           </div>
         </div>
       </div>

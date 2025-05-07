@@ -7,14 +7,14 @@ import { useCartStore } from '@/lib/store/useCartStore'
 import { NavbarLinks } from './NavbarLinks'
 import { NavbarButtons } from './NavbarButtons'
 import { MobileMenu } from './MobileMenu'
-import { CartModal } from './CartModal'
+import { useRouter } from 'next/navigation'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [opacity, setOpacity] = useState(1)
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const { data: session } = useSession()
   const { items } = useCartStore()
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,13 +46,10 @@ export default function Navbar() {
               </span>
             </div>
 
-            {/* Links */}
             <NavbarLinks />
 
-            {/* Desktop Buttons */}
-            <NavbarButtons itemsCount={items.length} session={session} onCartClick={() => setIsModalOpen(true)} />
+            <NavbarButtons itemsCount={items.length} session={session} onCartClick={() => router.push('/basket')} />
 
-            {/* Mobile Menu Button */}
             <div className="md:hidden">
               <button
                 aria-label="Toggle Menu"
@@ -66,12 +63,11 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {menuOpen && <MobileMenu session={session} />}
       </nav>
 
-      {/* Cart Modal */}
-      {isModalOpen && <CartModal onClose={() => setIsModalOpen(false)}   aria-label="Open menu" />}
+
+
     </>
   )
 }

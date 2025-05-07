@@ -66,12 +66,9 @@ const PriceFilter = ({ priceRange, setPriceRange, products }) => {
           backgroundColor: '#2A3454',
           height: '6px'
         }}
-        // Add accessible names for screen readers
         ariaLabelForHandle={['Minimum price', 'Maximum price']}
         ariaLabelledByForHandle={['min-price-label', 'max-price-label']}
-        // Reference the heading ID to associate the slider with the heading
         aria-labelledby="price-range-heading"
-        // Provide accessible value text for each handle
         ariaValueTextFormatterForHandle={(value) => formatPriceForA11y(value)}
       />
 

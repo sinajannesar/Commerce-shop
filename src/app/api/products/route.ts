@@ -27,9 +27,13 @@ const connectRedis = async () => {
 
 const KEYS = {
   API_PRODUCTS: "api:products",
-  LOCAL_PRODUCTS: "local:products"
+  LOCAL_PRODUCTS: "local:products",
+  LAST_REFRESH_TIME: "api:last_refresh_time"
 };
-const API_CACHE_TTL = 3600;
+
+// Cache settings
+const API_CACHE_TTL = 3600; // 1 hour TTL for Redis cache
+const CACHE_REFRESH_INTERVAL = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
 
 async function fetchApiProducts(): Promise<Product[]> {
   console.log("Fetching products from external API");
@@ -52,6 +56,40 @@ async function fetchApiProducts(): Promise<Product[]> {
   return products;
 }
 
+async function shouldRefreshCache(): Promise<boolean> {
+  try {
+    const lastRefreshTime = await redisClient.get(KEYS.LAST_REFRESH_TIME);
+    
+    if (!lastRefreshTime) {
+      return true;
+    }
+    
+    const lastRefresh = parseInt(lastRefreshTime);
+    const currentTime = Date.now();
+    
+    return (currentTime - lastRefresh) >= CACHE_REFRESH_INTERVAL;
+  } catch (error) {
+    console.error("Error checking cache refresh time:", error);
+    return true; // If there's an error, refresh to be safe
+  }
+}
+
+async function refreshCache(): Promise<Product[]> {
+  console.log("Refreshing API products cache");
+  const apiProducts = await fetchApiProducts();
+  
+  try {
+    await redisClient.set(KEYS.API_PRODUCTS, JSON.stringify(apiProducts), {
+      EX: API_CACHE_TTL
+    });
+    await redisClient.set(KEYS.LAST_REFRESH_TIME, Date.now().toString());
+    console.log("API products cache refreshed and timestamp updated");
+  } catch (redisError) {
+    console.error("Failed to update cache during refresh:", redisError);
+  }
+  
+  return apiProducts;
+}
 
 async function fetchProducts(): Promise<Product[]> {
   let apiProducts: Product[] = [];
@@ -61,21 +99,31 @@ async function fetchProducts(): Promise<Product[]> {
     await connectRedis();
     
     try {
-      const cachedApiProducts = await redisClient.get(KEYS.API_PRODUCTS);
+      // Check if we need to refresh the cache
+      const needsRefresh = await shouldRefreshCache();
       
-      if (cachedApiProducts) {
-        apiProducts = JSON.parse(cachedApiProducts);
-        console.log("API produc tsloaded from Redis cache");
+      if (needsRefresh) {
+        apiProducts = await refreshCache();
       } else {
-        apiProducts = await fetchApiProducts();
+        // Try to get from cache first
+        const cachedApiProducts = await redisClient.get(KEYS.API_PRODUCTS);
         
-        try {
-          await redisClient.set(KEYS.API_PRODUCTS, JSON.stringify(apiProducts), {
-            EX: API_CACHE_TTL
-          });
-          console.log("API products fetched and cached in Redis");
-        } catch (redisError) {
-          console.error("Failed to store API products in Redis:", redisError);
+        if (cachedApiProducts) {
+          apiProducts = JSON.parse(cachedApiProducts);
+          console.log("API products loaded from Redis cache");
+        } else {
+          // Cache miss, fetch and store
+          apiProducts = await fetchApiProducts();
+          
+          try {
+            await redisClient.set(KEYS.API_PRODUCTS, JSON.stringify(apiProducts), {
+              EX: API_CACHE_TTL
+            });
+            await redisClient.set(KEYS.LAST_REFRESH_TIME, Date.now().toString());
+            console.log("API products fetched and cached in Redis");
+          } catch (redisError) {
+            console.error("Failed to store API products in Redis:", redisError);
+          }
         }
       }
     } catch (apiProductsError) {

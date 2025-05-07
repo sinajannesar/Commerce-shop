@@ -2,8 +2,8 @@ import Link from "next/link";
 
 export function NavbarLinks() {
   const links = [
-    { label: "Home", href: "#" },
-    { label: "Features", href: "#" },
+    { label: "Home", href: "/" },
+    { label: "products", href: "/products" },
     { label: "Dashboard", href: "/dashboard" },
     { label: "Resources", href: "#" },
     { label: "Contact", href: "#" },

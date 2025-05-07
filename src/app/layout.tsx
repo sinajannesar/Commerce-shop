@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import NavigationWrapper from "@/components/header/navigationWrapper";
 import "./globals.css";
-import ToasterProvider from "./tosterproviders";
 import { AuthProvider } from "@/components/providers"
-
+import AppShell from "@/lib/layout/AppShell";
 export const metadata: Metadata = {
   title: "Shop - The Ultimate Online Store",
   description: "Discover the best deals on electronics, fashion, home essentials and more. Fast delivery. Secure checkout.",
@@ -45,11 +43,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-         <AuthProvider> 
-          <NavigationWrapper />
-          <ToasterProvider />
-          {children}
-         </AuthProvider> 
+        <AuthProvider>
+          <AppShell>{children}</AppShell>
+        </AuthProvider>
       </body>
     </html>
   );
