@@ -35,3 +35,8 @@ export const useProductFilter = (products = []) => {
     initializePriceRange
   };
 };
+
+
+
+// const query = searchQuery.toLowerCase().trim();
+// const matchesSearch = !query || product.title.toLowerCase().includes(query);

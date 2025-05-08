@@ -17,7 +17,6 @@ const PriceFilter = ({ priceRange, setPriceRange, products }) => {
 
   return (
     <div className="p-5">
-      {/* Changed from h2 to h3 to match the heading hierarchy */}
       <h3 className="text-lg font-medium text-white mb-5 flex items-center" id="price-range-heading">
         <svg
           className="w-5 h-5 mr-2 text-blue-400"

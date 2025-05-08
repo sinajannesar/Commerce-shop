@@ -36,10 +36,10 @@ export default function ProfileModal({ user }: { user: User }) {
       }
 
       setIsOpen(false);
-      alert('Profile updated successfully!');
+      console.log('Profile updated successfully!');
     } catch (error) {
       console.error(error);
-      alert('There was an error updating your profile.');
+      console.log('There was an error updating your profile.');
     }
   };
 
