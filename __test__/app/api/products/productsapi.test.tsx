@@ -102,12 +102,10 @@ describe('Product Page Tests', () => {
       // Arrange - Override supertest implementation for this test
       const originalGet = productPage.request.get;
       
-      // First call is slow (not cached)
       let callCount = 0;
       productPage.request.get = vi.fn().mockImplementation(() => {
         callCount++;
         return new Promise(resolve => {
-          // First call takes longer
           const delay = callCount === 1 ? 100 : 10;
           setTimeout(() => {
             resolve({
@@ -119,28 +117,23 @@ describe('Product Page Tests', () => {
         });
       });
       
-      // Act
       const cacheResult = await productPage.verifyRedisCache();
       
-      // Assert
       expect(cacheResult.isCached).toBe(true);
       expect(cacheResult.secondCallTime).toBeLessThan(cacheResult.firstCallTime);
       
-      // Cleanup
+      
       productPage.request.get = originalGet;
     });
   });
   
   describe('Error Handling', () => {
     test('should handle API errors gracefully', async () => {
-      // Arrange - Override the get method to simulate an error
       const originalGet = productPage.request.get;
       productPage.request.get = vi.fn().mockRejectedValue(new Error('Network error'));
       
-      // Act & Assert
       await expect(productPage.getAllProducts()).rejects.toThrow('Network error');
       
-      // Cleanup
       productPage.request.get = originalGet;
     });
   });

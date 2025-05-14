@@ -2,7 +2,8 @@
 
 import { useCartStore } from '@/lib/store/useCartStore'
 import Link from 'next/link'
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
+
 
 export default function SuccessPage() {
   const { clearCart } = useCartStore()
@@ -19,7 +20,7 @@ export default function SuccessPage() {
       >
         <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-5">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-            <polyline points="20 6 9 17 4 12" />
+            <polyline points="20 6 9 17 4 12" role="img" aria-hidden="true"/>
           </svg>
         </div>
         

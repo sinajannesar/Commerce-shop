@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { User } from "@/types/types";
 import { MailIcon, PhoneIcon, MapPinIcon } from "lucide-react";

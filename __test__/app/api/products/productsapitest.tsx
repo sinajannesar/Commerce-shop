@@ -1,7 +1,6 @@
 // pages/ProductPage.ts
 import supertest from 'supertest';
 
-// Define interfaces for better TypeScript support
 export interface Product {
   id: number;
   title: string;
@@ -27,15 +26,12 @@ export interface CategoryMap {
   [category: string]: Product[];
 }
 
-/**
- * Page Object Model for Products API
- * Encapsulates all product-related API interactions
- */
+
 class ProductPage {
   // Fix: Use the exact type returned by supertest
   private request: ReturnType<typeof supertest>;
   
-  constructor(baseUrl: string = process.env.BASE_URL || 'http://localhost:3000') {
+  constructor(baseUrl: string = process.env.BASE_URL || 'http://loalhostc:3000') {
     this.request = supertest(baseUrl);
   }
 

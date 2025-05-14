@@ -39,10 +39,9 @@ describe('LoginForm - POM style', () => {
     vi.resetAllMocks();
   });
 
-  // MAIN FUNCTIONALITY TESTS
   
   it('should render the login form with all required elements', () => {
-    // Verify all form elements are present
+
     expect(loginPage.getEmailInput()).toBeInTheDocument();
     expect(loginPage.getPasswordInput()).toBeInTheDocument();
     expect(loginPage.getRememberMeCheckbox()).toBeInTheDocument();
@@ -63,7 +62,7 @@ describe('LoginForm - POM style', () => {
   });
 
   it('should show error on invalid credentials', async () => {
-    // Mock signIn to return an error
+    
     (signIn as ReturnType<typeof vi.fn>).mockResolvedValue({ 
       error: 'Invalid credentials' 
     } as SignInResponse);
