@@ -1,159 +1,197 @@
 import { NextResponse } from "next/server";
 import { Product } from "@/types/types";
-import { createClient } from "redis";
 
-const redisClient = createClient({
-  url: process.env.REDIS_URL || "redis://localhost:6379",
-});
+// Configuration
+const API_CONFIG = {
+  baseUrl: process.env.API_BASE_URL || "https://fakestoreapi.com",
+  timeout: parseInt(process.env.API_TIMEOUT || "10000"),
+  retryAttempts: parseInt(process.env.API_RETRY_ATTEMPTS || "3"),
+  retryDelay: parseInt(process.env.API_RETRY_DELAY || "1000"),
+};
 
-redisClient.on("error", (err) => console.error("Redis Client Error:", err));
-
-let connectionPromise: Promise<void> | null = null;
-const connectRedis = async () => {
-  if (redisClient.isOpen) return;
-  
-  if (!connectionPromise) {
-    connectionPromise = redisClient.connect()
-      .then(() => console.log("Redis client connected"))
-      .catch((err) => {
-        console.error("Failed to connect to Redis:", err);
-        throw err;
-      })
-      .finally(() => connectionPromise = null);
+// Custom error classes
+class APIError extends Error {
+  constructor(message: string, public statusCode?: number, public originalError?: Error) {
+    super(message);
+    this.name = "APIError";
   }
-  
-  return connectionPromise;
+}
+
+class TimeoutError extends Error {
+  constructor(message: string = "Request timed out") {
+    super(message);
+    this.name = "TimeoutError";
+  }
+}
+
+// Utility functions
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+interface UnknownProduct {
+  [key: string]: unknown;
+}
+const isValidProduct = (product: UnknownProduct): boolean => {
+  return (
+    typeof product === 'object' &&
+    product !== null &&
+    typeof product.id === 'number' &&
+    typeof product.title === 'string' &&
+    typeof product.price === 'number' &&
+    typeof product.description === 'string' &&
+    typeof product.category === 'string' &&
+    typeof product.image === 'string'
+  );
 };
 
-const KEYS = {
-  API_PRODUCTS: "api:products",
-  LOCAL_PRODUCTS: "local:products",
-  LAST_REFRESH_TIME: "api:last_refresh_time"
-};
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-const API_CACHE_TTL = 3600; 
-const CACHE_REFRESH_INTERVAL = 12 * 60 * 60 * 1000; 
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new TimeoutError(`Request timed out after ${timeoutMs}ms`);
+    }
+    throw error;
+  }
+}
+
+// Retry logic
+async function fetchWithRetry<T>(
+  fetchFunction: () => Promise<T>,
+  maxAttempts: number = API_CONFIG.retryAttempts,
+  delay: number = API_CONFIG.retryDelay
+): Promise<T> {
+  let lastError: Error;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      console.log(`API fetch attempt ${attempt}/${maxAttempts}`);
+      return await fetchFunction();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      if (attempt === maxAttempts) {
+        console.error(`All ${maxAttempts} attempts failed. Last error:`, lastError.message);
+        throw lastError;
+      }
+
+      const waitTime = delay * Math.pow(2, attempt - 1); // Exponential backoff
+      console.warn(`Attempt ${attempt} failed: ${lastError.message}. Retrying in ${waitTime}ms...`);
+      await sleep(waitTime);
+    }
+  }
+
+  throw lastError!;
+}
 
 async function fetchApiProducts(): Promise<Product[]> {
-  console.log("Fetching products from external API");
-  const response = await fetch("https://fakestoreapi.com/products", {
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=60"
-    }
-  });
-  
-  if (!response.ok) {
-    throw new Error(`API fetch failed with status ${response.status}`);
-  }
-  
-  const products = await response.json();
-  if (!Array.isArray(products)) {
-    throw new Error("API response is not an array");
-  }
-  
-  return products;
-}
+  const startTime = Date.now();
+  console.log("🚀 Starting API fetch from", API_CONFIG.baseUrl);
 
-async function shouldRefreshCache(): Promise<boolean> {
-  try {
-    const lastRefreshTime = await redisClient.get(KEYS.LAST_REFRESH_TIME);
-    
-    if (!lastRefreshTime) {
-      return true;
-    }
-    
-    const lastRefresh = parseInt(lastRefreshTime);
-    const currentTime = Date.now();
-    
-    return (currentTime - lastRefresh) >= CACHE_REFRESH_INTERVAL;
-  } catch (error) {
-    console.error("Error checking cache refresh time:", error);
-    return true; 
-  }
-}
+  const fetchFunction = async () => {
+    const response = await fetchWithTimeout(
+      `${API_CONFIG.baseUrl}/products`,
+      {
+        method: 'GET',
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "User-Agent": "NextJS-App/1.0",
+          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=60"
+        },
+      },
+      API_CONFIG.timeout
+    );
 
-async function refreshCache(): Promise<Product[]> {
-  console.log("Refreshing API products cache");
-  const apiProducts = await fetchApiProducts();
-  
-  try {
-    await redisClient.set(KEYS.API_PRODUCTS, JSON.stringify(apiProducts), {
-      EX: API_CACHE_TTL
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error');
+      throw new APIError(
+        `API request failed: ${response.status} ${response.statusText}. ${errorText}`,
+        response.status
+      );
+    }
+
+    const data = await response.json();
+    
+    if (!Array.isArray(data)) {
+      throw new APIError("API response is not an array");
+    }
+
+    // Validate each product
+    const validProducts = data.filter((product, index) => {
+      const isValid = isValidProduct(product);
+      if (!isValid) {
+        console.warn(`⚠️  Invalid product at index ${index}:`, product);
+      }
+      return isValid;
     });
-    await redisClient.set(KEYS.LAST_REFRESH_TIME, Date.now().toString());
-    console.log("API products cache refreshed and timestamp updated");
-  } catch (redisError) {
-    console.error("Failed to update cache during refresh:", redisError);
-  }
-  
-  return apiProducts;
+
+    if (validProducts.length === 0) {
+      throw new APIError("No valid products found in API response");
+    }
+
+    const duration = Date.now() - startTime;
+    console.log(`✅ Successfully fetched ${validProducts.length} products in ${duration}ms`);
+    
+    return validProducts;
+  };
+
+  return await fetchWithRetry(fetchFunction);
 }
 
 export async function fetchProducts(): Promise<Product[]> {
-  let apiProducts: Product[] = [];
-  let localProducts: Product[] = [];
-  
   try {
-    await connectRedis();
-    
-    try {
-      const needsRefresh = await shouldRefreshCache();
-      
-      if (needsRefresh) {
-        apiProducts = await refreshCache();
-      } else {
-        const cachedApiProducts = await redisClient.get(KEYS.API_PRODUCTS);
-        
-        if (cachedApiProducts) {
-          apiProducts = JSON.parse(cachedApiProducts);
-          console.log("API products loaded from Redis cache");
-        } else {
-          apiProducts = await fetchApiProducts();
-          
-          try {
-            await redisClient.set(KEYS.API_PRODUCTS, JSON.stringify(apiProducts), {
-              EX: API_CACHE_TTL
-            });
-            await redisClient.set(KEYS.LAST_REFRESH_TIME, Date.now().toString());
-            console.log("API products fetched and cached in Redis");
-          } catch (redisError) {
-            console.error("Failed to store API products in Redis:", redisError);
-          }
-        }
-      }
-    } catch (apiProductsError) {
-      console.error("Error getting API products from Redis:", apiProductsError);
-      apiProducts = await fetchApiProducts();
-    }
-    
-    try {
-      const localProductsData = await redisClient.get(KEYS.LOCAL_PRODUCTS);
-      localProducts = localProductsData
-        ? JSON.parse(localProductsData)
-        : [];
-      
-      if (!localProductsData) {
-        await redisClient.set(KEYS.LOCAL_PRODUCTS, JSON.stringify([]));
-        console.log("Local products initialized in Redis");
-      }
-    } catch (localProductsError) {
-      console.error("Error getting local products from Redis:", localProductsError);
-      localProducts = [];
-    }
-    
-  } catch (connectionError) {
-    console.error("Redis connection error:", connectionError);
-    apiProducts = await fetchApiProducts();
+    return await fetchApiProducts();
+  } catch (error) {
+    console.error("❌ Error in fetchProducts:", error);
+    throw error;
   }
-  
-  return [...apiProducts, ...localProducts].filter(
-    (product, index, self) => 
-      index === self.findIndex(p => p.id === product.id)
-  );
 }
 
 export async function GET() {
-  const products = await fetchProducts();
-  return NextResponse.json(products);
+  try {
+    const products = await fetchProducts();
+    
+    return NextResponse.json(
+      { 
+        success: true, 
+        data: products, 
+        count: products.length,
+        timestamp: new Date().toISOString()
+      },
+      { 
+        status: 200,
+        headers: {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60',
+          'Content-Type': 'application/json',
+        }
+      }
+    );
+  } catch (error) {
+    console.error("❌ API route error:", error);
+    
+    const errorResponse = {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+      timestamp: new Date().toISOString()
+    };
+
+    if (error instanceof TimeoutError) {
+      return NextResponse.json(errorResponse, { status: 408 });
+    }
+    
+    if (error instanceof APIError && error.statusCode) {
+      return NextResponse.json(errorResponse, { status: error.statusCode });
+    }
+
+    return NextResponse.json(errorResponse, { status: 500 });
+  }
 }
